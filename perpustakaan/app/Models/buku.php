@@ -30,6 +30,9 @@ class Buku extends Model
     /**
      * Relasi: Satu buku bisa dipinjam berkali-kali (History Peminjaman).
      */
+    public function kategori() {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
     public function peminjaman()
     {
         return $this->hasMany(Peminjaman::class, 'buku_id');

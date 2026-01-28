@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; }
-        .sidebar { height: 100vh; background: #1e293b; color: white; position: fixed; padding-top: 20px; z-index: 100; }
+        .sidebar { height: 100vh; background: #1e293b; color: white; position: fixed; padding-top: 20px; z-index: 100; width: 16.6%; }
         .sidebar a { color: #cbd5e1; text-decoration: none; padding: 12px 20px; display: block; transition: 0.2s; }
         .sidebar a:hover, .sidebar a.active { background: #334155; color: #b8926a; border-left: 4px solid #b8926a; }
         .main-content { margin-left: 16.6%; padding: 40px; min-height: 100vh; }
@@ -17,7 +17,7 @@
         .header-title { font-family: 'Playfair Display', serif; color: #1e293b; font-size: 2rem; }
         .btn-dark { background: #1e293b; border: none; }
         .btn-dark:hover { background: #334155; }
-        .badge { font-weight: 500; padding: 6px 10px; }
+        .badge-category { font-size: 0.7rem; background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -25,10 +25,11 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-2 sidebar shadow">
-            <h4 class="text-center mb-4" style="color: #b8926a; font-family: 'Playfair Display', serif;">Treasure International School</h4>
-            <a href="/admin/dashboard">🏠 Dashboard</a>
-            <a href="/admin/buku" class="active">📚 Data Buku</a>
-            <a href="#">📖 Peminjaman</a>
+            <h4 class="text-center mb-4" style="color: #b8926a; font-family: 'Playfair Display', serif;">Treasure School</h4>
+<a href="{{ route('admin.dashboard') }}" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
+    🏠 Dashboard
+</a>            <a href="{{ route('admin.buku.index') }}" class="active">📚 Data Buku</a>
+            <a href="#">🏷️ Kelola Kategori</a>
             <hr class="mx-3 opacity-25">
             <div class="px-3 mt-4">
                 <form action="/logout" method="POST">
@@ -42,7 +43,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="header-title mb-1">Inventaris Buku</h2>
-                    <p class="text-muted small">Kelola koleksi perpustakaan dan pantau ketersediaan stok.</p>
+                    <p class="text-muted small">Kelola koleksi perpustakaan berdasarkan kategori dan stok.</p>
                 </div>
                 <button class="btn btn-dark rounded-0 px-4 py-2" data-bs-toggle="modal" data-bs-target="#addBookModal">
                     <span class="me-1">+</span> Tambah Koleksi Baru
@@ -50,9 +51,7 @@
             </div>
 
             @if(session('success'))
-                <div class="alert alert-success border-0 rounded-0 shadow-sm mb-4">
-                    {{ session('success') }}
-                </div>
+                <div class="alert alert-success border-0 rounded-0 shadow-sm mb-4">{{ session('success') }}</div>
             @endif
 
             <div class="card card-table shadow-sm">
@@ -61,10 +60,10 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light text-secondary small text-uppercase">
                                 <tr>
-                                    <th class="ps-4" width="80">Cover</th>
-                                    <th>Informasi Buku</th>
+                                    <th class="ps-4">Cover</th>
+                                    <th>Info Buku</th>
+                                    <th>Kategori</th>
                                     <th class="text-center">Stok</th>
-                                    <th>Status</th>
                                     <th class="text-end pe-4">Aksi</th>
                                 </tr>
                             </thead>
@@ -72,41 +71,84 @@
                                 @forelse($buku as $item)
                                 <tr>
                                     <td class="ps-4">
-                                        <img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/50x70?text=No+Cover' }}" 
-                                             class="book-img shadow-sm">
+                                        <img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/50x70' }}" class="book-img">
                                     </td>
                                     <td>
-                                        <div class="fw-bold text-dark">{{ $item->judul }}</div>
-                                        <div class="text-muted small">Oleh: {{ $item->penulis }}</div>
+                                        <div class="fw-bold">{{ $item->judul }}</div>
+                                        <div class="text-muted small">{{ $item->penulis }}</div>
                                     </td>
-                                    <td class="text-center fw-semibold">{{ $item->stok }}</td>
                                     <td>
-                                        @if($item->stok <= 0)
-                                            <span class="badge bg-danger">Habis</span>
-                                        @elseif($item->stok < 5)
-                                            <span class="badge bg-warning text-dark">Hampir Habis</span>
-                                        @else
-                                            <span class="badge bg-success bg-opacity-75">Tersedia</span>
-                                        @endif
+                                       <span class="badge-category">
+    @if($item->kategori)
+        {{ $item->kategori->nama }}
+    @else
+        ID Kategori di DB: {{ $item->category_id ?? 'Benar-benar Kosong' }}
+    @endif
+</span>
                                     </td>
+                                    <td class="text-center">{{ $item->stok }}</td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <button class="btn btn-sm btn-outline-secondary rounded-0">Edit</button>
+                                            <button class="btn btn-sm btn-outline-primary rounded-0" data-bs-toggle="modal" data-bs-target="#editBookModal{{ $item->id }}">Edit</button>
+                                            
                                             <form action="{{ route('admin.buku.destroy', $item->id) }}" method="POST">
                                                 @csrf @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger rounded-0" 
-                                                        onclick="return confirm('Hapus buku ini secara permanen?')">Hapus</button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-0" onclick="return confirm('Hapus buku ini?')">Hapus</button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
+
+                                <div class="modal fade" id="editBookModal{{ $item->id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content rounded-0">
+                                            <div class="modal-header bg-primary text-white rounded-0">
+                                                <h5 class="modal-title">Edit Koleksi: {{ $item->judul }}</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ route('admin.buku.update', $item->id) }}" method="POST" enctype="multipart/form-data">
+                                                @csrf @method('PUT')
+                                                <div class="modal-body p-4">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-8 text-start">
+                                                            <label class="form-label small fw-bold">JUDUL BUKU</label>
+                                                            <input type="text" name="judul" value="{{ $item->judul }}" class="form-control rounded-0" required>
+                                                        </div>
+                                                        <div class="col-md-4 text-start">
+                                                            <label class="form-label small fw-bold">KATEGORI</label>
+                                                            <select name="category_id" class="form-select rounded-0" required>
+                                                                @foreach($categories as $cat)
+                                                                    <option value="{{ $cat->id }}" {{ $item->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 text-start">
+                                                            <label class="form-label small fw-bold">PENULIS</label>
+                                                            <input type="text" name="penulis" value="{{ $item->penulis }}" class="form-control rounded-0" required>
+                                                        </div>
+                                                        <div class="col-md-3 text-start">
+                                                            <label class="form-label small fw-bold">STOK</label>
+                                                            <input type="number" name="stok" value="{{ $item->stok }}" class="form-control rounded-0" required>
+                                                        </div>
+                                                        <div class="col-md-3 text-start">
+                                                            <label class="form-label small fw-bold">GANTI COVER</label>
+                                                            <input type="file" name="cover" class="form-control rounded-0">
+                                                        </div>
+                                                        <div class="col-12 text-start">
+                                                            <label class="form-label small fw-bold">DESKRIPSI</label>
+                                                            <textarea name="deskripsi" class="form-control rounded-0" rows="3">{{ $item->deskripsi }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary rounded-0 px-4">Update Data</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-5">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="opacity-25 mb-3">
-                                        <p class="text-muted">Belum ada koleksi buku yang terdaftar.</p>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" class="text-center py-5">Belum ada koleksi buku.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -117,50 +159,50 @@
     </div>
 </div>
 
-<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+<div class="modal fade" id="addBookModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content rounded-0 border-0 shadow-lg">
+        <div class="modal-content rounded-0">
             <div class="modal-header bg-dark text-white rounded-0">
-                <h5 class="modal-title font-playfair" id="addBookModalLabel">Input Koleksi Buku Baru</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Input Koleksi Baru</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            
             <form action="{{ route('admin.buku.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body p-4">
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Judul Lengkap Buku</label>
-                            <input type="text" name="judul" class="form-control rounded-0 border-secondary-subtle" 
-                                   placeholder="Contoh: Laskar Pelangi" required>
+                            <label class="form-label small fw-bold">JUDUL BUKU</label>
+                            <input type="text" name="judul" class="form-control rounded-0" placeholder="Masukkan judul buku..." required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Jumlah Stok</label>
-                            <input type="number" name="stok" class="form-control rounded-0 border-secondary-subtle" 
-                                   placeholder="0" required min="1">
+                            <label class="form-label small fw-bold">KATEGORI</label>
+                            <select name="category_id" class="form-select rounded-0" required>
+                                <option value="" disabled selected>Pilih...</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Nama Penulis</label>
-                            <input type="text" name="penulis" class="form-control rounded-0 border-secondary-subtle" 
-                                   placeholder="Nama penulis..." required>
+                            <label class="form-label small fw-bold">PENULIS</label>
+                            <input type="text" name="penulis" class="form-control rounded-0" placeholder="Nama pengarang..." required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Upload Cover</label>
-                            <input type="file" name="cover" class="form-control rounded-0 border-secondary-subtle" 
-                                   accept="image/*">
-                            <div class="form-text mt-1" style="font-size: 0.7rem;">Format yang disarankan: JPG/PNG, Max 2MB.</div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">STOK</label>
+                            <input type="number" name="stok" class="form-control rounded-0" value="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">COVER</label>
+                            <input type="file" name="cover" class="form-control rounded-0">
                         </div>
                         <div class="col-12">
-                            <label class="form-label small fw-bold text-uppercase text-muted">Sinopsis / Deskripsi</label>
-                            <textarea name="deskripsi" class="form-control rounded-0 border-secondary-subtle" 
-                                      rows="4" placeholder="Tuliskan deskripsi singkat mengenai isi buku ini..."></textarea>
+                            <label class="form-label small fw-bold">DESKRIPSI / SINOPSIS</label>
+                            <textarea name="deskripsi" class="form-control rounded-0" rows="3" placeholder="Ringkasan cerita atau informasi buku..."></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-0 px-4">
-                    <button type="button" class="btn btn-secondary rounded-0 px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-dark rounded-0 px-5 shadow-sm" 
-                            style="border-left: 4px solid #b8926a;">Simpan Koleksi</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark rounded-0 px-4">Simpan</button>
                 </div>
             </form>
         </div>

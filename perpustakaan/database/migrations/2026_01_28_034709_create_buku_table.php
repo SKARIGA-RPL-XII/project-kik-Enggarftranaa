@@ -11,6 +11,7 @@ return new class extends Migration
         // Pastikan nama tabel di sini adalah 'buku'
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('judul');
             $table->string('penulis');
             $table->string('cover')->nullable();
