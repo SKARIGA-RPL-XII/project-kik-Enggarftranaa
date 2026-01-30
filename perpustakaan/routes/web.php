@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\QRController;
 
 // --- GUEST ROUTES (Tanpa Login) ---
 Route::get('/', function () {
@@ -37,4 +38,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/buku/delete/{id}', [AdminController::class, 'destroyBuku'])->name('admin.buku.destroy');
     });
 
+});
+
+// Pastikan user harus login dulu (auth)
+Route::get('/pinjam/tiket/{id}', [QRController::class, 'generateTicket'])->name('user.generate.qr')->middleware('auth');
+Route::get('/admin/scan', [AdminController::class, 'showScanner'])->name('admin.scan');
+Route::post('/admin/proses-pinjam', [AdminController::class, 'prosesPinjam'])->name('admin.proses.pinjam');
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/user', [AdminController::class, 'indexUser'])->name('admin.user.index');
+    Route::post('/user/store', [AdminController::class, 'storeUser'])->name('admin.user.store');
+    Route::delete('/user/{id}', [AdminController::class, 'destroyUser'])->name('admin.user.destroy');
 });

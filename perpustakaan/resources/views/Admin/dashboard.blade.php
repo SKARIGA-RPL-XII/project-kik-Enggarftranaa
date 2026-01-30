@@ -3,259 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Treasure International School</title>
+    <title>Admin Panel | Treasure Library</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --admin-sidebar: #1e293b; /* Slate Dark */
-            --admin-accent: #b8926a;  /* Classic Gold */
-            --admin-bg: #f8fafc;
+            --primary: #4361ee;
+            --accent: #4cc9f0;
+            --dark-sidebar: #1e1e2d;
+            --bg-light: #f4f7fe;
+            --text-muted: #7e8299;
         }
 
         body {
-            background-color: var(--admin-bg);
-            font-family: 'Inter', sans-serif;
-            color: #334155;
+            background-color: var(--bg-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #2b2b40;
         }
 
-        /* SIDEBAR STYLE */
+        /* SIDEBAR */
         .sidebar {
             height: 100vh;
-            background: var(--admin-sidebar);
+            background: var(--dark-sidebar);
             color: #fff;
-            padding: 30px 20px;
+            padding: 0;
             position: fixed;
-            border-right: 4px solid var(--admin-accent);
+            width: 16.66667%;
+            z-index: 100;
         }
 
-        .sidebar h4 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: var(--admin-accent);
-            margin-bottom: 40px;
-            text-align: center;
+        .sidebar-header {
+            padding: 30px 25px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .sidebar .user-info {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            font-size: 0.9rem;
+        .sidebar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: white;
+            text-decoration: none;
+            display: block;
         }
+
+        .sidebar-brand span { color: var(--accent); }
+
+        .sidebar-menu { padding: 20px; }
 
         .sidebar a {
-            color: #cbd5e1;
+            color: #a2a3b7;
             display: flex;
             align-items: center;
-            padding: 12px 15px;
+            padding: 14px 18px;
             text-decoration: none;
             transition: 0.3s;
-            border-radius: 6px;
-            margin-bottom: 5px;
-            font-size: 0.95rem;
-        }
-
-        .sidebar a:hover {
-            background: rgba(184, 146, 106, 0.2);
-            color: var(--admin-accent);
-            padding-left: 20px;
-        }
-
-        .sidebar a.active {
-            background: var(--admin-accent);
-            color: white;
-        }
-
-        /* MAIN CONTENT */
-        .main-content {
-            margin-left: 16.66667%; /* Offset for sidebar */
-            padding: 40px;
-        }
-
-        .page-header {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            color: var(--admin-sidebar);
-            margin-bottom: 30px;
-        }
-
-        /* CARD STYLE */
-        .card-box {
-            border: none;
-            border-radius: 0; /* Classic boxy style */
-            background: #fff;
-            border-top: 3px solid var(--admin-accent);
-            transition: transform 0.3s;
-        }
-
-        .card-box:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-box h6 {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #64748b;
-        }
-
-        .card-box h3 {
-            font-weight: 700;
-            color: var(--admin-sidebar);
-        }
-
-        /* TABLE STYLE */
-        .custom-table {
-            background: white;
-            border-radius: 0;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        .custom-table thead {
-            background: var(--admin-sidebar);
-            color: white;
-        }
-
-        .custom-table th {
-            font-weight: 400;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            padding: 15px;
-            border: none;
-        }
-
-        .badge {
-            border-radius: 0;
-            padding: 6px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
             font-weight: 500;
         }
 
-        /* LOGOUT BUTTON */
-        .btn-logout {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.3);
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--primary);
             color: white;
-            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
         }
 
-        .btn-logout:hover {
-            background: #ef4444;
-            border-color: #ef4444;
+        .sidebar-icon { margin-right: 12px; font-size: 1.1rem; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 16.66667%; padding: 40px; }
+
+        .page-header { font-weight: 800; color: var(--dark-sidebar); letter-spacing: -1px; margin-bottom: 30px; }
+
+        /* STAT CARDS */
+        .stat-card {
+            border: none; border-radius: 20px; background: #fff; padding: 25px;
+            transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            display: flex; align-items: center;
         }
+
+        .stat-card:hover { transform: translateY(-5px); }
+
+        .stat-icon {
+            width: 60px; height: 60px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-right: 20px;
+        }
+
+        .stat-info h6 { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        .stat-info h3 { font-weight: 800; margin-bottom: 0; }
+
+        .bg-light-primary { background: rgba(67, 97, 238, 0.1); color: var(--primary); }
+        .bg-light-accent { background: rgba(76, 201, 240, 0.1); color: var(--accent); }
+        .bg-light-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .bg-light-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* TABLE */
+        .table-container { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .badge-modern { padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.7rem; }
+        
+        .sidebar-footer { padding: 20px; position: absolute; bottom: 0; width: 100%; }
+        .btn-logout-admin { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; border-radius: 12px; padding: 12px; font-weight: 600; width: 100%; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid p-0">
+    <div class="row g-0">
 
         <div class="col-md-2 sidebar d-none d-md-block">
-            <h4>TREASURE<br><small>LIBRARY</small></h4>
+            <div class="sidebar-header text-center">
+                <a href="#" class="sidebar-brand">Treasure<span>Library</span></a>
+            </div>
             
-            <div class="user-info text-center">
-                <div class="mb-2">Logged in as:</div>
-                <strong class="text-white">{{ auth()->user()->name ?? 'Administrator' }}</strong>
+            <div class="sidebar-menu">
+                <small class="text-uppercase fw-bold text-muted mb-3 d-block" style="font-size: 0.65rem; letter-spacing: 2px; padding-left: 15px;">Main Menu</small>
+                <nav>
+                    <a href="/admin/dashboard" class="{{ Request::is('admin/dashboard') ? 'active' : '' }}"><span class="sidebar-icon">🏠</span> Dashboard</a>
+                    <a href="/admin/user"><span class="sidebar-icon">👥</span> Data Anggota</a>
+                    <a href="/admin/buku"><span class="sidebar-icon">📚</span> Koleksi Buku</a>
+                    
+                    <a href="{{ route('admin.scan') }}" class="{{ Request::is('admin/scan') ? 'active' : '' }}">
+                        <span class="sidebar-icon">📸</span> Scan Peminjaman
+                    </a>
+
+                    <a href="#"><span class="sidebar-icon">🔄</span> Sirkulasi</a>
+                    <a href="#"><span class="sidebar-icon">📊</span> Laporan</a>
+                </nav>
             </div>
 
-            <nav>
-                <a href="/admin/dashboard" class="active">🏠 Dashboard</a>
-                <a href="/admin/user">👥 Data User</a>
-                <a href="/admin/buku">📚 Data Buku</a>
-                <a href="#">📖 Peminjaman</a>
-                <a href="#">📊 Laporan</a>
-            </nav>
-
-            <div style="position: absolute; bottom: 30px; width: calc(100% - 40px);">
-                <hr class="text-white-50">
+            <div class="sidebar-footer">
                 <form action="/logout" method="POST">
                     @csrf
-                    <button class="btn btn-logout btn-sm w-100">
-                        Keluar Sesi
-                    </button>
+                    <button class="btn btn-logout-admin">Keluar Panel</button>
                 </form>
             </div>
         </div>
 
         <div class="col-md-10 main-content">
-            <h2 class="page-header">Dashboard</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="page-header">Overview Dashboard</h2>
+                <div class="text-muted small fw-bold">{{ now()->format('d F Y') }}</div>
+            </div>
 
-            <div class="row g-4">
+            <div class="row g-4 mb-5">
                 <div class="col-md-3">
-                    <div class="card card-box shadow-sm p-4">
-                        <h6>Total Anggota</h6>
-                        <h3>120</h3>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-light-primary">👥</div>
+                        <div class="stat-info"><h6>Total Anggota</h6><h3>1,240</h3></div>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="card card-box shadow-sm p-4">
-                        <h6>Koleksi Buku</h6>
-                        <h3>350</h3>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-light-accent">📚</div>
+                        <div class="stat-info"><h6>Koleksi Buku</h6><h3>3,502</h3></div>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="card card-box shadow-sm p-4">
-                        <h6>Sirkulasi Aktif</h6>
-                        <h3>45</h3>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-light-success">🔄</div>
+                        <div class="stat-info"><h6>Peminjaman</h6><h3>452</h3></div>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="card card-box shadow-sm p-4" style="border-top-color: #ef4444;">
-                        <h6>Lewat Jatuh Tempo</h6>
-                        <h3 class="text-danger">8</h3>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-light-danger">⚠️</div>
+                        <div class="stat-info"><h6>Overdue</h6><h3>12</h3></div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0" style="font-family: 'Playfair Display', serif;">Aktivitas Terkini</h4>
-                    <button class="btn btn-sm btn-outline-secondary">Lihat Semua</button>
+            <div class="table-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold mb-0">Aktivitas Terkini</h4>
+                    <button class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Lihat Semua</button>
                 </div>
                 
-                <div class="table-responsive custom-table">
-                    <table class="table mb-0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
                         <thead>
                             <tr>
-                                <th>Peminjam</th>
-                                <th>Judul Buku</th>
-                                <th>Tanggal Pinjam</th>
+                                <th>Nama Peminjam</th>
+                                <th>Judul Koleksi</th>
+                                <th>Waktu Pinjam</th>
                                 <th>Status</th>
-                                <th>Aksi</th>
+                                <th class="text-end">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white">
+                        <tbody>
                             <tr>
-                                <td class="fw-bold">Andi</td>
-                                <td class="text-muted">Laravel Untuk Pemula</td>
-                                <td>20 Jan 2026</td>
-                                <td><span class="badge bg-success">Dipinjam</span></td>
-                                <td><a href="#" class="btn btn-sm btn-light border">Detail</a></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">Sinta</td>
-                                <td class="text-muted">Basis Data</td>
-                                <td>18 Jan 2026</td>
-                                <td><span class="badge bg-danger">Terlambat</span></td>
-                                <td><a href="#" class="btn btn-sm btn-light border">Detail</a></td>
+                                <td><div class="fw-bold">Andi Wibowo</div><small class="text-muted">ID: T-882</small></td>
+                                <td><div class="text-dark">Laravel Deep Dive</div><small class="text-muted">Rak: A-12</small></td>
+                                <td>24 Jan 2026</td>
+                                <td><span class="badge badge-modern bg-success text-white">AKTIF</span></td>
+                                <td class="text-end"><button class="btn btn-light btn-sm fw-bold border">Kelola</button></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

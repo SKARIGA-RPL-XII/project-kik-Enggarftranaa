@@ -3,269 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library Dashboard | Classic Edition</title>
+    <title>Treasure Library | Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --midnight: #1a2a6c;
-            --gold: #b8926a;
-            --soft-red: #8b0000; /* Darker red for classic feel */
-            --bg-paper: #fcfaf7;
+            --primary: #4361ee;
+            --accent: #4cc9f0;
+            --dark: #1e1e2d;
+            --text-muted: #7e8299;
+            --bg-body: #f4f7fe;
         }
 
         body {
-            background-color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-            color: #333;
+            background-color: var(--bg-body);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--dark);
         }
 
-        /* Navbar */
+        /* Navbar Modern */
         .navbar {
-            background-color: var(--midnight) !important;
-            border-bottom: 3px solid var(--gold);
-            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1.2rem 2rem;
         }
 
         .navbar-brand {
-            font-family: 'Playfair Display', serif;
             font-weight: 700;
-            letter-spacing: 1px;
+            color: var(--primary) !important;
+            letter-spacing: -0.5px;
+            font-size: 1.5rem;
         }
 
-        /* Header Title */
-        .dashboard-header {
-            font-family: 'Playfair Display', serif;
+        /* Greeting Section */
+        .welcome-section {
+            padding: 40px 0;
+        }
+
+        .welcome-title {
             font-weight: 700;
-            color: var(--midnight);
-            position: relative;
-            display: inline-block;
-            margin-bottom: 40px;
+            font-size: 2rem;
+            margin-bottom: 8px;
         }
 
-        .dashboard-header::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background-color: var(--gold);
-        }
-
-        /* Classic Card Design */
+        /* Modern Card Design */
         .custom-card {
             background: #ffffff;
             border: none;
-            border-radius: 0;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border-left: 0px solid var(--midnight);
+            border-radius: 24px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .custom-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
         }
 
         .custom-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            border-left: 8px solid var(--midnight);
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(67, 97, 238, 0.15);
         }
 
-        .icon-box {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            filter: grayscale(100%);
-            transition: 0.3s;
+        .custom-card:hover::before {
+            opacity: 1;
         }
 
-        .custom-card:hover .icon-box {
-            filter: grayscale(0%);
-            transform: scale(1.1);
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .custom-card:hover .icon-wrapper {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(-10deg);
         }
 
         .card-title {
-            font-family: 'Playfair Display', serif;
             font-weight: 700;
-            color: var(--midnight);
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            transition: color 0.4s ease;
         }
 
-        .card-text {
-            font-size: 0.85rem;
-            color: #777;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: color 0.4s ease;
         }
 
-        .card-logout:hover {
-            border-left: 8px solid var(--soft-red);
-        }
-
-        /* --- CLASSIC MODAL STYLE --- */
-        .modal-classic .modal-content {
-            border-radius: 0;
-            background-color: var(--bg-paper);
-            border: 1px solid var(--gold);
-            box-shadow: 0 0 0 8px white, 0 0 0 10px var(--gold);
-            margin: 15px;
-        }
-
-        .modal-classic .modal-body {
-            padding: 3.5rem 2rem !important;
-            position: relative;
-        }
-
-        /* Fleurons / Ornament */
-        .modal-classic .modal-body::before {
-            content: "❦";
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--gold);
-            font-size: 1.8rem;
-        }
-
-        .modal-title-classic {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            color: var(--midnight);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid var(--gold);
-            display: inline-block;
-            padding-bottom: 5px;
-            margin-bottom: 25px;
-        }
-
-        .modal-text-classic {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.15rem;
-            color: #444;
-            line-height: 1.6;
-        }
-
-        .btn-classic-outline {
-            border: 1.5px solid var(--midnight);
-            color: var(--midnight);
-            background: transparent;
-            border-radius: 0;
-            padding: 10px 25px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.75rem;
-            transition: 0.3s;
-        }
-
-        .btn-classic-outline:hover {
-            background: #eee;
-        }
-
-        .btn-classic-dark {
-            background-color: var(--midnight);
+        .custom-card:hover .card-title,
+        .custom-card:hover .card-desc {
             color: white;
-            border: 1px solid var(--midnight);
-            border-radius: 0;
-            padding: 10px 25px;
+        }
+
+        /* Logout Card Specific */
+        .card-logout:hover::before {
+            background: linear-gradient(135deg, #f72585, #ff4d6d);
+        }
+        
+        .logout-wrapper {
+            background: rgba(247, 37, 133, 0.1);
+        }
+
+        /* Modal Modern */
+        .modal-modern .modal-content {
+            border: none;
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .btn-round {
+            border-radius: 12px;
+            padding: 12px 24px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.75rem;
             transition: 0.3s;
         }
 
-        .btn-classic-dark:hover {
-            background-color: #0d163f;
-            color: var(--gold);
+        .btn-cancel {
+            background: #f1f3f9;
+            color: #5e6278;
+            border: none;
+        }
+
+        .btn-confirm {
+            background: #f72585;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        }
+
+        .btn-confirm:hover {
+            background: #d61f71;
+            transform: scale(1.05);
+            color: white;
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark shadow-sm">
-    <div class="container-fluid">
-        <span class="navbar-brand">BIBLIOTHECA</span>
-        <div class="d-flex align-items-center">
-            <span class="text-white-50 me-2 small italic">Logged in as:</span>
-            <span class="text-white fw-bold">{{ Auth::user()->name ?? 'Tuan User' }}</span>
+<nav class="navbar sticky-top">
+    <div class="container">
+        <span class="navbar-brand">Treasure<span style="color: var(--accent);"> Library</span></span>
+        <div class="d-flex align-items-center bg-light px-3 py-2 rounded-pill shadow-sm">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; font-size: 0.8rem; font-weight: bold;">
+                {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
+            </div>
+            <span class="small fw-bold text-dark">{{ Auth::user()->name ?? 'Member' }}</span>
         </div>
     </div>
 </nav>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12 text-center text-md-start">
-            <h2 class="dashboard-header">Panel Navigasi</h2>
-        </div>
+<div class="container mt-4">
+    <div class="welcome-section text-center text-md-start">
+        <h1 class="welcome-title">Halo, Selamat Datang 👋</h1>
+        <p class="text-muted">Jelajahi harta karun pengetahuan di Treasure International School.</p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 mt-2">
         <div class="col-md-4">
             <a href="/user/buku" class="text-decoration-none h-100">
-                <div class="card custom-card p-5 text-center shadow-sm">
-                    <span class="icon-box">📚</span>
+                <div class="card custom-card shadow-sm">
+                    <div class="icon-wrapper">📖</div>
                     <h4 class="card-title">Katalog Buku</h4>
-                    <p class="card-text">Eksplorasi Koleksi</p>
+                    <p class="card-desc">Cari koleksi literatur terbaru</p>
                 </div>
             </a>
         </div>
 
         <div class="col-md-4">
             <a href="/user/riwayat" class="text-decoration-none h-100">
-                <div class="card custom-card p-5 text-center shadow-sm">
-                    <span class="icon-box">⏳</span>
-                    <h4 class="card-title">Arsip Riwayat</h4>
-                    <p class="card-text">Catatan Peminjaman</p>
+                <div class="card custom-card shadow-sm">
+                    <div class="icon-wrapper">🕒</div>
+                    <h4 class="card-title">Riwayat Pinjam</h4>
+                    <p class="card-desc">Pantau status akses Anda</p>
                 </div>
             </a>
         </div>
 
         <div class="col-md-4">
-            <div class="card custom-card card-logout p-5 text-center shadow-sm" 
+            <div class="card custom-card card-logout shadow-sm" 
                  style="cursor: pointer;" 
                  data-bs-toggle="modal" 
                  data-bs-target="#logoutModal">
-                <span class="icon-box">🚪</span>
+                <div class="icon-wrapper logout-wrapper">🚪</div>
                 <h4 class="card-title">Keluar Sesi</h4>
-                <p class="card-text">Selesaikan Akses</p>
+                <p class="card-desc">Akhiri akses pangkalan data</p>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-12 text-center text-muted mt-5">
-            <hr style="width: 80px; margin: 20px auto; border-top: 3px solid var(--gold);">
-            <small style="letter-spacing: 3px; font-weight: 300;">EST. 2024 — ARCHIVE SYSTEM</small>
-        </div>
+    <div class="footer text-center mt-5 pt-5">
+        <p class="small text-muted mb-0">&copy; 2026 Treasure Library Management System</p>
+        <p class="small text-primary fw-bold">Treasure International School</p>
     </div>
 </div>
 
-<div class="modal fade modal-classic" id="logoutModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade modal-modern" id="logoutModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-            <div class="modal-body text-center">
-                <h3 class="modal-title-classic">Maklumat Keluar</h3>
-                
-                <p class="modal-text-classic mb-5 px-3">
-                    "Apakah anda yakin ingin mengakhiri sesi akses pada pangkalan data Bibliotheca?"
-                </p>
+        <div class="modal-content shadow-lg">
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <span style="font-size: 4rem;">🗝️</span>
+                </div>
+                <h3 class="fw-bold mb-3">Konfirmasi Keluar</h3>
+                <p class="text-muted mb-5">Apakah Anda yakin ingin mengunci kembali akses ke pangkalan data Treasure Library?</p>
                 
                 <div class="d-flex justify-content-center gap-3">
-                    <button type="button" class="btn btn-classic-outline" data-bs-dismiss="modal">
-                        Batal
-                    </button>
-                    <button type="button" class="btn btn-classic-dark shadow-sm" 
+                    <button type="button" class="btn btn-round btn-cancel px-5" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-round btn-confirm px-5" 
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        Selesaikan Sesi
+                        Ya, Selesaikan
                     </button>
-                </div>
-
-                <div class="mt-5">
-                    <small style="color: var(--gold); letter-spacing: 2px; font-size: 0.6rem; opacity: 0.8;">
-                        SYSTEMA ARCHIVUM — TERMINATE ACCESS
-                    </small>
                 </div>
             </div>
         </div>
@@ -279,4 +254,4 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-</html>
+</html>     
