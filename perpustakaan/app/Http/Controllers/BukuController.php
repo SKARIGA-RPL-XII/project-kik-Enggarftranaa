@@ -3,67 +3,99 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
-use App\Models\Category;  
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BukuController extends Controller
 {
-    // Menampilkan semua daftar buku (untuk sisi Admin)
+    /**
+     * UNTUK USER: Menampilkan Katalog Digital di Halaman Dashboard
+     */
+    public function indexUser(Request $request)
+    {
+        // 1. Ambil semua kategori untuk dropdown filter (Variabel: $categories)
+        $categories = Category::all();
+
+        // 2. Query dasar dengan relasi kategori
+        $query = Buku::with('kategori');
+
+        // 3. Filter Pencarian (Judul/Penulis)
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('penulis', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // 4. Filter Kategori
+        if ($request->filled('kategori')) {
+            $query->where('category_id', $request->kategori);
+        }
+
+        $buku = $query->latest()->get();
+
+        // Mengarah ke view dashboard dan mengirim variabel $categories
+        return view('user.dashboard', compact('buku', 'categories'));
+    }
+
+    /**
+     * UNTUK ADMIN: Menampilkan Management Buku
+     */
     public function index()
     {
-        $semuaBuku = buku::latest()->get();
-        return view('admin.buku.index', compact('semuaBuku'));
+        $buku = Buku::with('kategori')->latest()->get();
+        $categories = Category::all();
+        return view('admin.buku', compact('buku', 'categories'));
     }
 
-    // Menampilkan form tambah buku
-    public function create()
-    {
-        return view('admin.buku.create');
-    }
-
-    // Menyimpan buku baru ke database
     public function store(Request $request)
     {
         $request->validate([
             'judul' => 'required|string|max:255',
             'penulis' => 'required|string|max:255',
-            'stok' => 'required|integer|min:1',
+            'stok' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'cover' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
         ]);
 
-        Buku::create([
-            'judul' => $request->judul,
-            'penulis' => $request->penulis,
-            'status' => 'tersedia', // Default saat buku baru ditambah
-        ]);
+        $data = $request->all();
 
-        return redirect()->route('buku.index')->with('success', 'Buku berhasil ditambahkan!');
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        }
+
+        Buku::create($data);
+        return redirect()->back()->with('success', 'Buku berhasil ditambahkan!');
     }
 
-    // Menampilkan form edit buku
-    public function edit(Buku $buku)
+    public function update(Request $request, $id)
     {
-        return view('admin.buku.edit', compact('buku'));
-    }
-
-    // Memperbarui data buku
-    public function update(Request $request, Buku $buku)
-    {
+        $buku = Buku::findOrFail($id);
         $request->validate([
             'judul' => 'required',
             'penulis' => 'required',
-            'status' => 'required|in:tersedia,dipinjam,perbaikan',
+            'stok' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
-        $buku->update($request->all());
+        $data = $request->all();
 
-        return redirect()->route('buku.index')->with('success', 'Data buku berhasil diperbarui!');
+        if ($request->hasFile('cover')) {
+            if ($buku->cover) Storage::disk('public')->delete($buku->cover);
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        }
+
+        $buku->update($data);
+        return redirect()->back()->with('success', 'Data buku berhasil diperbarui!');
     }
 
-    // Menghapus buku
-    public function destroy(Buku $buku)
+    public function destroy($id)
     {
+        $buku = Buku::findOrFail($id);
+        if ($buku->cover) Storage::disk('public')->delete($buku->cover);
         $buku->delete();
-        return redirect()->route('buku.index')->with('success', 'Buku telah dihapus.');
+        
+        return redirect()->back()->with('success', 'Buku telah dihapus.');
     }
 }
-

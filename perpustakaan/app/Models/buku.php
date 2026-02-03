@@ -20,6 +20,7 @@ class Buku extends Model
      * Ini penting agar data dari form Admin bisa langsung disimpan ke database.
      */
     protected $fillable = [
+        'category_id',
         'judul',
         'penulis',
         'cover',

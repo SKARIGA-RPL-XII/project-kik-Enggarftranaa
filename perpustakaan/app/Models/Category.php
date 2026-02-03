@@ -3,18 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Category extends Model
 {
-    // Jika nama tabel Anda di database adalah 'categories'
+    use HasFactory;
+
     protected $table = 'categories'; 
 
-    // Kolom yang boleh diisi secara massal
-    protected $fillable = ['nama'];
+    protected $fillable = ['nama', 'slug']; // Tambahkan slug jika Anda menggunakannya
 
-    // Relasi ke Buku (Satu kategori punya banyak buku)
-    public function bukus()
+    // Ubah dari 'bukus' menjadi 'buku' agar sesuai dengan panggilan di Controller
+    public function buku()
     {
-        return $this->hasMany(Buku::class);
-    }
+        // Pastikan kolom di tabel buku adalah 'category_id'
+        return $this->hasMany(Buku::class, 'category_id');
+
+    return $this->belongsTo(Category::class, 'category_id');
 }
+    }

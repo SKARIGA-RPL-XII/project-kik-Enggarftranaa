@@ -8,7 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Pastikan nama tabel di sini adalah 'buku'
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
@@ -23,7 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        
         Schema::dropIfExists('buku');
     }
 };

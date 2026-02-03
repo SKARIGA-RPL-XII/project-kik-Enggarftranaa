@@ -5,6 +5,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\QRController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\BukuController;
 
 // --- GUEST ROUTES (Tanpa Login) ---
 Route::get('/', function () {
@@ -50,3 +52,35 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('/user/store', [AdminController::class, 'storeUser'])->name('admin.user.store');
     Route::delete('/user/{id}', [AdminController::class, 'destroyUser'])->name('admin.user.destroy');
 });
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Route CRUD Kategori
+    Route::resource('kategori', KategoriController::class);
+    
+    // Route CRUD Buku (contoh)
+    Route::resource('buku', BukuController::class);
+}); 
+// Route untuk Katalog User
+Route::get('/user/buku', [BukuController::class, 'indexUser'])->name('user.buku');
+
+// Route untuk Admin (Resource)
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('buku', BukuController::class);
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Route resource untuk index, store, update, destroy
+    Route::resource('user', UserController::class);
+    
+    // Route khusus untuk reset password
+    Route::put('user/{id}/reset', [UserController::class, 'resetPassword'])->name('user.reset');
+});
+Route::get('/user/dashboard', [BukuController::class, 'indexUser'])->name('user.dashboard');
+// Tambahkan ini di web.php
+Route::get('/pinjam/{id}', [PeminjamanController::class, 'pinjam'])->name('pinjam.buku');
+use App\Models\Buku;
+
+// Pastikan namanya 'generate.qr' agar sesuai dengan route() di tombol Anda
+Route::get('/generate-qr/{id}', function ($id) {
+    $buku = Buku::findOrFail($id);
+    return view('user.generate-qr', compact('buku'));
+})->name('generate-qr');
