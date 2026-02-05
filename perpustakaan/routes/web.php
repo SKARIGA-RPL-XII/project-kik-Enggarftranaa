@@ -7,6 +7,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\QRController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PeminjamanController;
 
 // --- GUEST ROUTES (Tanpa Login) ---
 Route::get('/', function () {
@@ -84,3 +86,20 @@ Route::get('/generate-qr/{id}', function ($id) {
     $buku = Buku::findOrFail($id);
     return view('user.generate-qr', compact('buku'));
 })->name('generate-qr');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // ... rute lainnya
+});
+   Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+// Memanggil fungsi update() untuk simpan data
+Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+// Pastikan strukturnya seperti ini
+Route::get('/admin/get-peminjam/{id}', [AdminController::class, 'getDataScan']);
+
+
+Route::prefix('admin')->group(function () {
+    Route::get('/scan', [PeminjamanController::class, 'index'])->name('admin.scan');
+    Route::get('/get-peminjam/{id}', [PeminjamanController::class, 'checkData']);
+    Route::post('/proses-pinjam', [PeminjamanController::class, 'store'])->name('admin.proses.pinjam');
+});

@@ -6,7 +6,8 @@
     <title>Scanner QR | Treasure Library</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -14,32 +15,29 @@
             --accent: #4cc9f0;
             --dark-sidebar: #1e1e2d;
             --bg-light: #f4f7fe;
-            --text-muted: #7e8299;
         }
 
-        body { background-color: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif; color: #2b2b40; }
+        body { background-color: var(--bg-light); font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        /* SIDEBAR (Sama dengan Dashboard) */
-        .sidebar { height: 100vh; background: var(--dark-sidebar); color: #fff; position: fixed; width: 16.66667%; z-index: 100; }
-        .sidebar-header { padding: 30px 25px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .sidebar-brand { font-weight: 700; font-size: 1.25rem; color: white; text-decoration: none; display: block; }
+        /* SIDEBAR */
+        .sidebar { height: 100vh; background: var(--dark-sidebar); color: #fff; position: fixed; width: 16.6%; z-index: 100; }
+        .sidebar-brand { padding: 30px 25px; font-weight: 700; font-size: 1.25rem; color: white; text-decoration: none; display: block; }
         .sidebar-brand span { color: var(--accent); }
-        .sidebar-menu { padding: 20px; }
-        .sidebar a { color: #a2a3b7; display: flex; align-items: center; padding: 14px 18px; text-decoration: none; transition: 0.3s; border-radius: 12px; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; }
-        .sidebar a:hover, .sidebar a.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); }
-        .sidebar-icon { margin-right: 12px; font-size: 1.1rem; }
+        .sidebar a { color: #a2a3b7; display: flex; align-items: center; padding: 14px 18px; text-decoration: none; transition: 0.3s; border-radius: 12px; margin: 0 20px 8px; font-size: 0.9rem; }
+        .sidebar a.active { background: var(--primary); color: white; }
 
-        /* MAIN CONTENT */
-        .main-content { margin-left: 16.66667%; padding: 40px; }
-        .page-header { font-weight: 800; color: var(--dark-sidebar); letter-spacing: -1px; margin-bottom: 30px; }
-
-        /* SCANNER BOX */
+        /* CONTENT */
+        .main-content { margin-left: 16.6%; padding: 40px; }
         .scanner-card { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: none; }
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: none !important; background: #f8fafc; }
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; border: none !important; }
+
+        /* INFO CARD */
+        .result-card { background: white; border-radius: 24px; padding: 35px; display: none; box-shadow: 0 15px 35px rgba(0,0,0,0.08); animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .result-card { background: white; border-radius: 24px; padding: 30px; display: none; border-left: 6px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .info-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        .info-value { font-size: 1rem; font-weight: 600; color: var(--dark-sidebar); margin-bottom: 15px; }
+        .user-profile-img { width: 80px; height: 80px; object-fit: cover; border-radius: 20px; border: 3px solid #f0f4ff; }
+        .data-box { background: #f8fafc; border-radius: 18px; padding: 15px; border-left: 4px solid var(--primary); height: 100%; }
+        .info-label { font-size: 0.7rem; font-weight: 800; color: #adb5bd; text-transform: uppercase; margin-bottom: 3px; }
     </style>
 </head>
 <body>
@@ -47,57 +45,70 @@
 <div class="container-fluid p-0">
     <div class="row g-0">
         <div class="col-md-2 sidebar d-none d-md-block">
-            <div class="sidebar-header text-center">
-                <a href="#" class="sidebar-brand">Treasure<span>Library</span></a>
-            </div>
-            <div class="sidebar-menu">
-                <small class="text-uppercase fw-bold text-muted mb-3 d-block" style="font-size: 0.65rem; letter-spacing: 2px; padding-left: 15px;">Main Menu</small>
-                <nav>
-                    <a href="/admin/dashboard" class="{{ Request::is('admin/dashboard') ? 'active' : '' }}"><span class="sidebar-icon">🏠</span> Dashboard</a>
-                    <a href="/admin/user"><span class="sidebar-icon">👥</span> Data Anggota</a>
-                    <a href="/admin/buku"><span class="sidebar-icon">📚</span> Koleksi Buku</a>
-                    <a href="{{ route('admin.scan') }}" class="{{ Request::is('admin/scan') ? 'active' : '' }}"><span class="sidebar-icon">📸</span> Scan Peminjaman</a>
-                    <a href="#"><span class="sidebar-icon">🔄</span> Sirkulasi</a>
-                    <a href="#"><span class="sidebar-icon">📊</span> Laporan</a>
-                </nav>
+            <a href="#" class="sidebar-brand">Treasure<span>Library</span></a>
+            <div class="mt-4">
+                <a href="/admin/dashboard">🏠 Dashboard</a>
+                <a href="/admin/user">👥 Data Anggota</a>
+                <a href="/admin/buku">📚 Koleksi Buku</a>
+                <a href="#" class="active">📸 Scan Peminjaman</a>
             </div>
         </div>
 
         <div class="col-md-10 main-content">
-            <h2 class="page-header">Scan QR Peminjaman</h2>
+            <h2 class="fw-800 mb-4">Scanner Peminjaman</h2>
 
             <div class="row g-4">
-                <div class="col-lg-6">
+                <div class="col-lg-5">
                     <div class="scanner-card text-center">
                         <div id="reader"></div>
-                        <p class="text-muted small mt-3">Arahkan kamera ke QR Code Peminjam</p>
+                        <div id="status-text" class="mt-3 text-muted small">Kamera Siap</div>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
-                    <div id="result-card" class="result-card">
-                        <h4 class="fw-bold mb-4 text-primary">Konfirmasi Data Pinjam</h4>
-                        <form action="{{ route('admin.proses.pinjam') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="payload" id="raw_payload">
-                            
-                            <div class="mb-3">
-                                <span class="info-label">Detail User & Buku</span>
-                                <div class="info-value" id="display-data">Menunggu scan...</div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-4 fw-bold shadow">
-                                VALIDASI SEKARANG
-                            </button>
-                            <button type="button" onclick="location.reload()" class="btn btn-light w-100 mt-2 rounded-4 text-muted">Scan Ulang</button>
-                        </form>
+                <div class="col-lg-7">
+                    <div id="placeholder-card" class="scanner-card d-flex align-items-center justify-content-center text-center" style="min-height: 400px; border: 2px dashed #cbd5e0; background: transparent;">
+                        <div>
+                            <div style="font-size: 4rem; opacity: 0.3;">📸</div>
+                            <h5 class="text-muted mt-3">Silakan Scan QR Code Transaksi</h5>
+                        </div>
                     </div>
 
-                    <div id="placeholder-card" class="scanner-card d-flex align-items-center justify-content-center text-center" style="min-height: 300px; border: 2px dashed #cbd5e0; background: transparent;">
-                        <div class="text-muted">
-                            <div style="font-size: 3rem;">📸</div>
-                            <p class="fw-bold">Kamera siap, silakan scan</p>
+                    <div id="result-card" class="result-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="" id="res-foto" class="user-profile-img me-3">
+                            <div>
+                                <h4 class="fw-bold mb-1" id="res-nama">Nama Peminjam</h4>
+                                <span class="badge bg-primary rounded-pill" id="res-email">email@library.com</span>
+                            </div>
                         </div>
+
+                        <hr class="my-4" style="opacity: 0.1;">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="data-box">
+                                    <div class="info-label">ID Peminjam</div>
+                                    <div class="fw-bold text-dark" id="res-id">#USER-0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="data-box" style="border-left-color: #ff9f43;">
+                                    <div class="info-label">Status Verifikasi</div>
+                                    <div class="fw-bold text-success">Anggota Aktif</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form action="{{ route('admin.proses.pinjam') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="user_id" id="user_id_input">
+                            <input type="hidden" name="payload" id="payload_input">
+                            
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-4 fw-bold shadow-lg">
+                                KONFIRMASI PEMINJAMAN
+                            </button>
+                            <button type="button" onclick="location.reload()" class="btn btn-link w-100 mt-2 text-muted text-decoration-none small">Batal & Scan Ulang</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -108,16 +119,44 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     function onScanSuccess(decodedText, decodedResult) {
+        // Hentikan scanner
         html5QrcodeScanner.clear();
-        document.getElementById('placeholder-card').style.display = 'none';
-        document.getElementById('result-card').style.display = 'block';
-        document.getElementById('raw_payload').value = decodedText;
-        document.getElementById('display-data').innerText = decodedText;
+        document.getElementById('status-text').innerText = "Memproses Payload...";
+
+        // Gunakan encodeURIComponent karena string mengandung karakter khusus seperti '|' dan ':'
+        fetch(`/admin/get-peminjam/${encodeURIComponent(decodedText)}`)
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    document.getElementById('placeholder-card').style.display = 'none';
+                    document.getElementById('result-card').style.display = 'block';
+                    
+                    // Isi Data ke Tampilan
+                    document.getElementById('res-nama').innerText = data.user.nama;
+                    document.getElementById('res-email').innerText = data.user.email;
+                    document.getElementById('res-foto').src = data.user.foto;
+                    document.getElementById('res-id').innerText = "#ID-" + data.user.id_asli;
+                    
+                    // Isi Hidden Input untuk Form Submit
+                    document.getElementById('user_id_input').value = data.user.id_asli;
+                    document.getElementById('payload_input').value = decodedText;
+                } else {
+                    alert(data.message);
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Terjadi kesalahan koneksi ke server.");
+                location.reload();
+            });
     }
 
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader", { fps: 10, qrbox: {width: 250, height: 250} }
-    );
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+        fps: 20, // Lebih cepat lebih baik
+        qrbox: {width: 250, height: 250},
+        aspectRatio: 1.0 
+    });
     html5QrcodeScanner.render(onScanSuccess);
 </script>
 </body>

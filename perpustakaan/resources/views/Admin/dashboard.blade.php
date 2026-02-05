@@ -129,9 +129,7 @@
                     <a href="{{ route('admin.scan') }}" class="{{ Request::is('admin/scan') ? 'active' : '' }}">
                         <span class="sidebar-icon">📸</span> Scan Peminjaman
                     </a>
-
-                    <a href="#"><span class="sidebar-icon">🔄</span> Sirkulasi</a>
-                    <a href="#"><span class="sidebar-icon">📊</span> Laporan</a>
+                    <a href="#"><span class="sidebar-icon">📊</span> Riwayat Peminjaman</a>
                 </nav>
             </div>
 
