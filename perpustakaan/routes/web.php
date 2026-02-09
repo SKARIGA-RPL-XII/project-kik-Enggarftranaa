@@ -1,105 +1,85 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\QRController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\BukuController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\{
+    AuthController,
+    AdminController,
+    UserController,
+    BukuController,
+    KategoriController,
+    PeminjamanController,
+    ProfileController,
+    QRController
+};
 
-// --- GUEST ROUTES (Tanpa Login) ---
+/*
+|--------------------------------------------------------------------------
+| PUBLIC ROUTES
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticate']);
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'store']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'login')->name('login');
+    Route::post('/login', 'authenticate');
+    Route::get('/register', 'register')->name('register');
+    Route::post('/register', 'store');
+    Route::post('/logout', 'logout')->name('logout');
+});
 
-
-// --- PROTECTED ROUTES (Harus Login) ---
+/*
+|--------------------------------------------------------------------------
+| PROTECTED ROUTES (Harus Login)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-    
-    // DASHBOARD UMUM
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::get('/user/dashboard', function () {
-        return view('User.dashboard');
-    })->name('user.dashboard');
 
-    // FITUR USER
-    Route::get('/user/buku', [UserController::class, 'buku'])->name('user.buku');
-
-    // FITUR ADMIN (Manajemen Buku)
-    Route::prefix('admin')->group(function () {
-        Route::get('/buku', [AdminController::class, 'databuku'])->name('admin.buku.index');
-        Route::post('/buku/store', [AdminController::class, 'storeBuku'])->name('admin.buku.store');
-        Route::put('/buku/update/{id}', [AdminController::class, 'updateBuku'])->name('admin.buku.update');
-        Route::delete('/buku/delete/{id}', [AdminController::class, 'destroyBuku'])->name('admin.buku.destroy');
+    // --- PROFILE ---
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile/update', 'update')->name('profile.update');
     });
 
-});
+    // --- USER SIDE (PEMINJAM) ---
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('/dashboard', [BukuController::class, 'indexUser'])->name('dashboard');
+        Route::get('/buku', [BukuController::class, 'indexUser'])->name('buku');
+        
+        // Fitur Peminjaman & Generate Tiket QR
+        Route::get('/pinjam/{id}', [PeminjamanController::class, 'pinjam'])->name('pinjam.buku');
+        Route::get('/pinjam/tiket/{id}', [QRController::class, 'generateTicket'])->name('generate.qr');
+        Route::get('/generate-qr/{id}', function ($id) {
+            $buku = \App\Models\Buku::findOrFail($id);
+            return view('user.generate-qr', compact('buku'));
+        })->name('manual.qr');
+    });
 
-// Pastikan user harus login dulu (auth)
-Route::get('/pinjam/tiket/{id}', [QRController::class, 'generateTicket'])->name('user.generate.qr')->middleware('auth');
-Route::get('/admin/scan', [AdminController::class, 'showScanner'])->name('admin.scan');
-Route::post('/admin/proses-pinjam', [AdminController::class, 'prosesPinjam'])->name('admin.proses.pinjam');
+    // --- ADMIN SIDE (PUSTAKAWAN) ---
+    // Middleware 'is_admin' pastikan sudah terdaftar di Kernel.php Anda
+    Route::prefix('admin')->name('admin.')->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // CRUD Resources
+        Route::resource('buku', BukuController::class);
+        Route::resource('kategori', KategoriController::class);
+        Route::resource('user', UserController::class);
+        Route::put('user/{id}/reset', [UserController::class, 'resetPassword'])->name('user.reset');
 
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::get('/user', [AdminController::class, 'indexUser'])->name('admin.user.index');
-    Route::post('/user/store', [AdminController::class, 'storeUser'])->name('admin.user.store');
-    Route::delete('/user/{id}', [AdminController::class, 'destroyUser'])->name('admin.user.destroy');
-});
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Route CRUD Kategori
-    Route::resource('kategori', KategoriController::class);
-    
-    // Route CRUD Buku (contoh)
-    Route::resource('buku', BukuController::class);
-}); 
-// Route untuk Katalog User
-Route::get('/user/buku', [BukuController::class, 'indexUser'])->name('user.buku');
+        // Fitur Scanner
+        Route::get('/scan', [AdminController::class, 'showScanner'])->name('scan');
+        Route::get('/get-peminjam/{user_id}/{buku_id}', [AdminController::class, 'getDataScan']);
+        Route::post('/proses-pinjam', [AdminController::class, 'prosesPinjam'])->name('proses.pinjam');
 
-// Route untuk Admin (Resource)
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('buku', BukuController::class);
-});
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Route resource untuk index, store, update, destroy
-    Route::resource('user', UserController::class);
-    
-    // Route khusus untuk reset password
-    Route::put('user/{id}/reset', [UserController::class, 'resetPassword'])->name('user.reset');
-});
-Route::get('/user/dashboard', [BukuController::class, 'indexUser'])->name('user.dashboard');
-// Tambahkan ini di web.php
-Route::get('/pinjam/{id}', [PeminjamanController::class, 'pinjam'])->name('pinjam.buku');
-use App\Models\Buku;
-
-// Pastikan namanya 'generate.qr' agar sesuai dengan route() di tombol Anda
-Route::get('/generate-qr/{id}', function ($id) {
-    $buku = Buku::findOrFail($id);
-    return view('user.generate-qr', compact('buku'));
-})->name('generate-qr');
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    // ... rute lainnya
-});
-   Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-
-// Memanggil fungsi update() untuk simpan data
-Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-// Pastikan strukturnya seperti ini
-Route::get('/admin/get-peminjam/{id}', [AdminController::class, 'getDataScan']);
-
-
-Route::prefix('admin')->group(function () {
-    Route::get('/scan', [PeminjamanController::class, 'index'])->name('admin.scan');
-    Route::get('/get-peminjam/{id}', [PeminjamanController::class, 'checkData']);
-    Route::post('/proses-pinjam', [PeminjamanController::class, 'store'])->name('admin.proses.pinjam');
+        // Log / Riwayat Peminjaman
+        Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
+        Route::delete('/peminjaman/{id}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
+        
+        // Tombol Kembalikan (Fixed Name)
+        Route::post('/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
+        Route::post('/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
+    });
 });

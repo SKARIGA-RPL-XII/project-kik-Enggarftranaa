@@ -2,37 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Peminjaman extends Model
 {
-    use HasFactory;
+    protected $table = 'peminjaman'; // Pastikan sesuai nama tabel Anda
 
-    protected $table = 'peminjamans';
-
-    // Kolom yang boleh diisi
     protected $fillable = [
         'user_id',
         'buku_id',
-        'tanggal_pinjam',
-        'tanggal_kembali',
-        'status',
+        'tgl_pinjam',
+        'tgl_kembali',
+        'status'
     ];
 
-    /**
-     * Relasi: Peminjaman ini milik seorang User
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
+    // Tambahkan ini agar Laravel menghormati format tanggal
+    protected $casts = [
+        'tgl_pinjam' => 'datetime',
+        'tgl_kembali' => 'date', // Ini akan memastikan format YYYY-MM-DD terjaga
+    ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi: Peminjaman ini merujuk pada satu Buku
-     */
-    public function buku()
-    {
-        return $this->belongsTo(Buku::class, 'buku_id');
+    public function buku() {
+        return $this->belongsTo(Buku::class);
     }
 }

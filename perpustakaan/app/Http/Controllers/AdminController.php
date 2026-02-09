@@ -18,7 +18,13 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    /* --- LOGIKA DATA BUKU --- */
+    /* |--------------------------------------------------------------------------
+    | LOGIKA DATA BUKU (MANUAL)
+    |--------------------------------------------------------------------------
+    | Catatan: Jika Anda menggunakan Resource Controller (BukuController),
+    | method di bawah ini mungkin tidak terpakai lewat route resource, 
+    | tapi saya biarkan di sini sesuai permintaan Anda.
+    */
 
     public function dataBuku()
     {
@@ -88,56 +94,78 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Buku berhasil dihapus.');
     }
 
-    /* --- LOGIKA SCANNER QR (DIPERBARUI) --- */
+    /* |--------------------------------------------------------------------------
+    | LOGIKA SCANNER QR (FIXED & MATCHED WITH JS)
+    |--------------------------------------------------------------------------
+    */
 
-    public function showScanner()
-    {
+    public function showScanner() {
         return view('admin.scan');
     }
 
     /**
-     * AJAX: Mencari data User dengan pembersihan input otomatis
+     * AJAX: Fungsi ini dipanggil oleh fetch() di admin/scan.blade.php
+     * Mengembalikan JSON data User dan Buku
      */
-    public function getDataScan($payload)
-{
-    // 1. Inisialisasi ID yang akan dicari
-    $userId = $payload;
+    public function getDataScan($user_id, $buku_id) {
+        $user = User::find($user_id);
+        $buku = Buku::find($buku_id);
 
-    // 2. Cek apakah payload mengandung format pipa "|" (seperti USER:3|BUKU:1)
-    if (str_contains($payload, '|')) {
-        $parts = explode('|', $payload);
-        foreach ($parts as $part) {
-            // Cari bagian yang mengandung "USER:"
-            if (str_starts_with($part, 'USER:')) {
-                $userId = str_replace('USER:', '', $part);
-                break;
-            }
+        if (!$user || !$buku) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Data User atau Buku tidak valid/tidak ditemukan.'
+            ]);
         }
-    } 
-    // 3. Jika bukan format pipa, tapi ada awalan "USER:" saja
-    else if (str_starts_with($payload, 'USER:')) {
-        $userId = str_replace('USER:', '', $payload);
-    }
 
-    // 4. Cari di database berdasarkan ID yang sudah diekstrak
-    $user = User::find($userId);
-    
-    if ($user) {
+        // PENTING: Struktur JSON ini disesuaikan dengan scan.blade.php
         return response()->json([
             'success' => true,
             'user' => [
+                'id_asli' => $user->id, // Dipakai di input hidden user_id_input
                 'nama' => $user->name,
                 'email' => $user->email,
-                'foto' => $user->avatar ? asset('img/avatars/'.$user->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random',
+                // Gunakan foto avatar atau default UI Avatars jika null
+                'foto' => $user->avatar ? asset('storage/'.$user->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=1e40af&color=fff',
             ],
-            // Opsional: Jika Anda ingin mengirim info buku yang ada di QR juga
-            'debug_payload' => $payload 
+            'buku' => [
+                'id' => $buku->id, // Dipakai di input hidden buku_id_input
+                'judul' => $buku->judul,
+                'kode' => $buku->kode ?? 'BOOK-'.$buku->id, // Handle jika kolom kode kosong
+                // Gunakan cover buku atau placeholder abu-abu
+                'cover_url' => $buku->cover ? asset('storage/'.$buku->cover) : 'https://placehold.co/150x200?text=No+Cover',
+            ]
         ]);
     }
 
-    return response()->json([
-        'success' => false, 
-        'message' => 'User dengan ID ' . $userId . ' tidak ditemukan. (Data asli: ' . $payload . ')'
-    ]);
-}
+    /**
+     * Menyimpan data transaksi peminjaman ke database
+     */
+    public function prosesPinjam(Request $request) {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'buku_id' => 'required|exists:buku,id',
+            'tgl_kembali' => 'required|date'
+        ]);
+
+        // Cek stok sebelum meminjam
+        $buku = Buku::find($request->buku_id);
+        if($buku->stok < 1) {
+            return redirect()->back()->with('error', 'Gagal! Stok buku habis.');
+        }
+
+        // Simpan Peminjaman
+        Peminjaman::create([
+            'user_id' => $request->user_id,
+            'buku_id' => $request->buku_id,
+            'tgl_pinjam' => now(),
+            'tgl_kembali' => $request->tgl_kembali,
+            'status' => 'dipinjam' // Pastikan kolom ini ada di tabel database Anda
+        ]);
+
+        // Kurangi Stok
+        $buku->decrement('stok');
+
+        return redirect()->route('admin.scan')->with('success', 'Transaksi Peminjaman Berhasil!');
+    }
 }

@@ -3,101 +3,100 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Models\Buku;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
-    /**
-     * Menampilkan halaman scanner
-     */
     public function index()
+    {
+        // Mengambil data terbaru di posisi paling atas
+        $peminjamans = Peminjaman::with(['user', 'buku'])->latest()->get();
+        return view('admin.peminjaman', compact('peminjamans'));
+    }
+
+    public function scan()
     {
         return view('admin.scan');
     }
 
-    /**
-     * AJAX: Mencari data User dan Buku dari Payload QR
-     * Format Payload: USER:3|BUKU:1|TIME:123456
-     */
-    public function checkData($payload)
-    {
-        try {
-            $userId = null;
-            $bukuId = null;
-
-            // 1. Bedah Payload
-            if (str_contains($payload, '|')) {
-                $parts = explode('|', $payload);
-                foreach ($parts as $part) {
-                    if (str_starts_with($part, 'USER:')) $userId = str_replace('USER:', '', $part);
-                    if (str_starts_with($part, 'BUKU:')) $bukuId = str_replace('BUKU:', '', $part);
-                }
-            } else {
-                $userId = $payload; // Fallback jika hanya ID angka
-            }
-
-            // 2. Ambil Data User
-            $user = User::find($userId);
-            if (!$user) {
-                return response()->json(['success' => false, 'message' => 'Anggota tidak ditemukan!']);
-            }
-
-            // 3. Ambil Data Buku (Opsional jika ingin ditampilkan di scan)
-            $buku = Buku::find($bukuId);
-
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'nama' => $user->name,
-                    'email' => $user->email,
-                    'foto' => $user->avatar ? asset('img/avatars/'.$user->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random',
-                ],
-                'buku' => $buku ? [
-                    'id' => $buku->id,
-                    'judul' => $buku->judul
-                ] : null
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
-        }
-    }
-
-    /**
-     * Eksekusi simpan ke database
-     */
     public function store(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'buku_id' => 'nullable|exists:bukus,id',
+            'buku_id' => 'required|exists:buku,id',
+            'tgl_kembali' => 'required|date',
         ]);
 
         DB::beginTransaction();
         try {
-            // Simpan transaksi
+            $cek = Peminjaman::where('user_id', $request->user_id)
+                             ->where('buku_id', $request->buku_id)
+                             ->where('status', 'AKTIF')
+                             ->first();
+            
+            if($cek) return redirect()->back()->with('error', 'Gagal! Anggota masih meminjam buku ini.');
+
             Peminjaman::create([
                 'user_id' => $request->user_id,
-                'buku_id' => $request->buku_id, // Mengambil ID buku dari hasil bedah QR
+                'buku_id' => $request->buku_id,
                 'tgl_pinjam' => now(),
+                'tgl_kembali' => $request->tgl_kembali,
                 'status' => 'AKTIF',
             ]);
 
-            // Kurangi stok buku jika ada buku_id
-            if ($request->buku_id) {
-                Buku::where('id', $request->buku_id)->decrement('stok');
-            }
+            DB::table('buku')->where('id', $request->buku_id)->decrement('stok');
 
             DB::commit();
-            return redirect()->route('admin.dashboard')->with('success', 'Peminjaman berhasil dicatat!');
-
+            return redirect()->route('admin.peminjaman.index')->with('success', 'Peminjaman berhasil dicatat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menyimpan transaksi.');
+            return redirect()->back()->with('error', 'Kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function kembalikan($id)
+    {
+        DB::beginTransaction();
+        try {
+            $p = Peminjaman::findOrFail($id);
+
+            // Cek jika sudah dikembalikan
+            if (strtoupper(trim($p->status)) === 'DIKEMBALIKAN') {
+                return redirect()->back()->with('error', 'Buku sudah berstatus dikembalikan.');
+            }
+
+            // Update Status ke DIKEMBALIKAN (sesuai pengecekan di Blade)
+            $p->update(['status' => 'DIKEMBALIKAN']);
+
+            // Kembalikan Stok Buku
+            DB::table('buku')->where('id', $p->buku_id)->increment('stok');
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Buku berhasil diterima! Status diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses pengembalian.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+        try {
+            $p = Peminjaman::findOrFail($id);
+            // Jika dihapus saat masih AKTIF, kembalikan stok
+            if (strtoupper(trim($p->status)) === 'AKTIF') {
+                DB::table('buku')->where('id', $p->buku_id)->increment('stok');
+            }
+            $p->delete();
+            DB::commit();
+            return redirect()->back()->with('success', 'Riwayat berhasil dihapus!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus data.');
         }
     }
 }

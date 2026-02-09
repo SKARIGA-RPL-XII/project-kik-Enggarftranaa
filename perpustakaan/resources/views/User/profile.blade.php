@@ -3,265 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile | Treasure Library</title>
+    <title>Account Settings | Treasure Library</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
-            --dark-navy: #121826;
-            --accent-blue: #3b82f6;
-            --glass-white: rgba(255, 255, 255, 0.9);
+            --brand-primary: #2563eb;
+            --brand-dark: #0f172a;
+            --bg-body: #f1f5f9;
+            --text-main: #334155;
+            --text-muted: #64748b;
         }
 
         body { 
-            background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: var(--dark-navy);
-            min-height: 100vh;
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-main);
+            letter-spacing: -0.01em;
         }
 
-        .card { 
-            border: none; 
-            border-radius: 35px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        /* Layout Professional */
+        .settings-container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .main-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             overflow: hidden;
-            background: var(--glass-white);
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
         }
 
-        .profile-header {
-            background: linear-gradient(135deg, #121826 0%, #232d3f 100%);
-            color: white;
-            padding: 50px 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        .avatar-container {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-        }
-
-        .avatar-wrapper {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-            background: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        /* Sidebar-like Header */
+        .profile-section-header {
+            padding: 32px;
+            border-bottom: 1px solid #f1f5f9;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 24px;
         }
 
-        .avatar-wrapper img {
-            width: 100%;
-            height: 100%;
+        .avatar-edit-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             object-fit: cover;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--brand-primary);
         }
 
-        .avatar-initial {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--dark-navy);
-        }
-
-        .upload-badge {
+        .btn-camera-overlay {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: var(--accent-blue);
-            width: 38px;
-            height: 38px;
+            bottom: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            border: 3px solid #121826;
+            font-size: 12px;
             cursor: pointer;
-            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
         }
 
-        .upload-badge:hover { transform: scale(1.1); background: #2563eb; }
-
-        .form-label { font-size: 0.8rem; letter-spacing: 0.5px; margin-bottom: 8px; }
-        
-        .form-control {
-            border: 1.5px solid #e2e8f0;
-            padding: 14px 20px;
-            border-radius: 16px;
-            font-size: 0.95rem;
+        .btn-camera-overlay:hover {
             background: #f8fafc;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--brand-primary);
+        }
+
+        /* Form Styling */
+        .form-section {
+            padding: 32px;
+        }
+
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--brand-dark);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            border: 1px solid #cbd5e1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
         .form-control:focus {
-            background: white;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.1);
-            transform: translateY(-2px);
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .password-section {
-            background: #ffffff;
+        /* Security Box */
+        .security-container {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
             border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            padding: 25px;
-            margin-top: 30px;
         }
 
-        .btn-save { 
-            background: linear-gradient(135deg, #121826 0%, #2d3748 100%);
-            color: white; 
-            border-radius: 18px; 
-            padding: 16px; 
-            font-weight: 700; 
-            border: none;
-            width: 100%;
-            margin-top: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: 0.3s;
-        }
-
-        .btn-save:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+        /* Button Professional */
+        .btn-submit {
+            background: var(--brand-dark);
             color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
-        .back-link {
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            color: var(--dark-navy) !important;
+        .btn-submit:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
         }
-        .back-link:hover { transform: translateX(-5px); }
 
-        input[type="file"] { display: none; }
+        .btn-cancel {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .btn-cancel:hover { color: var(--brand-dark); }
+
+        .validation-msg {
+            font-size: 0.8rem;
+            color: #dc2626;
+            margin-top: 4px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-5">
-                
-                <a href="{{ url('user/dashboard') }}" class="text-decoration-none mb-4 d-inline-block fw-bold small back-link">
-                    <i class="fas fa-arrow-left me-2"></i> Kembali ke Dashboard
+    <div class="container">
+        <div class="settings-container">
+            
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="fw-bold mb-1">Pengaturan Profil</h4>
+                    <p class="text-muted small mb-0">Kelola informasi publik dan keamanan akun Anda.</p>
+                </div>
+                <a href="{{ url('user/dashboard') }}" class="btn-cancel">
+                    <i class="fas fa-times me-2"></i>Batal
                 </a>
-                
-                <div class="card">
-                    <form id="profileForm" method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-                        @csrf
-                        @method('patch')
+            </div>
+            
+            <div class="main-card">
+                <form id="profileForm" method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('patch')
 
-                        <div class="profile-header">
-                            <div class="avatar-container">
-                                <div class="avatar-wrapper" id="preview-box">
-                                    {{-- PERBAIKAN JALUR GAMBAR --}}
-                                    @if($user->avatar)
-                                        <img src="{{ asset('img/avatars/'.$user->avatar) }}" id="preview-img">
-                                    @else
-                                        <div class="avatar-initial" id="preview-initial">{{ substr($user->name, 0, 1) }}</div>
-                                        <img src="" id="preview-img" style="display:none;">
-                                    @endif
-                                </div>
-                                <label for="avatar-input" class="upload-badge">
-                                    <i class="fas fa-camera"></i>
-                                </label>
-                                <input type="file" name="avatar" id="avatar-input" accept="image/*">
+                    <div class="profile-section-header">
+                        <div class="avatar-edit-wrapper">
+                            <div class="avatar-preview" id="preview-container">
+                                @if($user->avatar)
+                                    <img src="{{ asset('img/avatars/'.$user->avatar) }}" id="preview-img" class="w-100 h-100 rounded-circle">
+                                @else
+                                    <span id="initial-placeholder">{{ substr($user->name, 0, 1) }}</span>
+                                    <img src="" id="preview-img" class="w-100 h-100 rounded-circle d-none">
+                                @endif
                             </div>
-                            <h3 style="font-family: 'Playfair Display', serif; font-weight: 900;" class="mb-1">{{ $user->name }}</h3>
-                            <p class="text-white-50 small mb-0"><i class="fas fa-id-badge me-1"></i> Member Treasure Library</p>
+                            <label for="avatar-input" class="btn-camera-overlay">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                            <input type="file" name="avatar" id="avatar-input" hidden accept="image/*">
+                        </div>
+                        <div>
+                            <h5 class="mb-1 fw-bold">{{ $user->name }}</h5>
+                            <p class="text-muted small mb-0">Terdaftar sejak {{ $user->created_at->format('M Y') }}</p>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none small mt-1" onclick="document.getElementById('avatar-input').click()">Ganti foto profil</button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">Informasi Umum</div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Nama Lengkap</label>
+                                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                                @error('name') <div class="validation-msg">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Alamat Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                                @error('email') <div class="validation-msg">{{ $message }}</div> @enderror
+                            </div>
                         </div>
 
-                        <div class="p-4 p-lg-5 pt-4">
-                            <div class="mb-4">
-                                <label class="form-label text-uppercase fw-800 text-muted">Nama Lengkap</label>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
-                                @error('name') <div class="text-danger extra-small mt-1">{{ $message }}</div> @enderror
-                            </div>
+                        <hr class="my-5" style="border-top: 1px solid #f1f5f9;">
 
-                            <div class="mb-4">
-                                <label class="form-label text-uppercase fw-800 text-muted">Alamat Email</label>
-                                <input type="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
-                                @error('email') <div class="text-danger extra-small mt-1">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="password-section">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3 text-primary">
-                                        <i class="fas fa-shield-alt"></i>
-                                    </div>
-                                    <h6 class="mb-0 fw-bold">Update Keamanan</h6>
+                        <div class="section-title">Keamanan Akun</div>
+                        <div class="security-container">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Kata Sandi Baru</label>
+                                    <input type="password" name="password" id="password" class="form-control" placeholder="••••••••">
+                                    <div id="password-error" class="validation-msg"></div>
                                 </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Password Baru</label>
-                                    <input type="password" name="password" class="form-control" placeholder="Biarkan kosong jika tidak diganti">
-                                </div>
-
-                                <div class="mb-0">
-                                    <label class="form-label text-muted">Konfirmasi Password</label>
-                                    <input type="password" name="password_confirmation" class="form-control">
+                                <div class="col-md-6">
+                                    <label class="form-label">Konfirmasi Kata Sandi</label>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" placeholder="••••••••">
+                                    <div id="confirm-error" class="validation-msg"></div>
                                 </div>
                             </div>
+                            <div class="mt-3">
+                                <p class="text-muted" style="font-size: 0.8rem;">
+                                    <i class="fas fa-info-circle me-1"></i> 
+                                    Biarkan kosong jika Anda tidak ingin mengganti kata sandi.
+                                </p>
+                            </div>
+                        </div>
 
-                            <button type="submit" class="btn btn-save">
-                                <i class="fas fa-check-circle me-2"></i> Simpan Perubahan
+                        <div class="mt-5 d-flex justify-content-end gap-3 border-top pt-4">
+                            <button type="submit" class="btn btn-submit">
+                                Simpan Perubahan
                             </button>
                         </div>
-                    </form>
-                </div>
-
-                <div class="text-center mt-4">
-                    <p class="text-muted small">Anggota sejak {{ $user->created_at->format('M Y') }}</p>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Preview Gambar Real-time
+        // Image Preview Handler
         document.getElementById("avatar-input").onchange = function (evt) {
             const [file] = this.files;
             if (file) {
                 const img = document.getElementById("preview-img");
-                const initial = document.getElementById("preview-initial");
+                const initial = document.getElementById("initial-placeholder");
                 
                 img.src = URL.createObjectURL(file);
-                img.style.display = "block";
-                
-                if(initial) {
-                    initial.style.display = "none";
-                }
-                
-                const box = document.getElementById("preview-box");
-                box.style.transform = "scale(1.1)";
-                box.style.transition = "0.3s";
-                setTimeout(() => box.style.transform = "scale(1)", 300);
+                img.classList.remove("d-none");
+                if(initial) initial.classList.add("d-none");
             }
         };
 
+        // Form Validation Logic
+        document.getElementById("profileForm").onsubmit = function(e) {
+            let isValid = true;
+            const password = document.getElementById("password");
+            const confirm = document.getElementById("password_confirmation");
+            
+            document.getElementById("password-error").innerText = "";
+            document.getElementById("confirm-error").innerText = "";
+
+            if (password.value.length > 0) {
+                if (password.value.length < 8) {
+                    document.getElementById("password-error").innerText = "Kata sandi minimal 8 karakter.";
+                    isValid = false;
+                }
+                if (password.value !== confirm.value) {
+                    document.getElementById("confirm-error").innerText = "Konfirmasi kata sandi tidak cocok.";
+                    isValid = false;
+                }
+            }
+
+            if (!isValid) e.preventDefault();
+        };
+
+        // Professional Notification
         @if (session('status') === 'profile-updated')
         Swal.fire({
-            title: 'Berhasil!',
-            text: 'Profil dan foto Anda telah diperbarui.',
+            toast: true,
+            position: 'top-end',
             icon: 'success',
+            title: 'Profil berhasil diperbarui',
             showConfirmButton: false,
-            timer: 2000,
-            background: '#ffffff',
-            borderRadius: '25px',
-            iconColor: '#3b82f6'
+            timer: 3000,
+            timerProgressBar: true
         });
         @endif
     </script>

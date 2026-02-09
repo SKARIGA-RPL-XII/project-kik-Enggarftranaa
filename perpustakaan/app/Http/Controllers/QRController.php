@@ -1,22 +1,28 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class QRController extends Controller {
-    public function generateTicket($id) {
-        // 1. Ambil data buku
+class QRController extends Controller
+{
+    public function generateTicket(Request $request, $id)
+    {
         $buku = Buku::findOrFail($id);
+        $user = Auth::user();
+        $tgl_kembali = $request->input('tgl_kembali');
 
-        // 2. Siapkan data teks untuk isi QR (ID User + ID Buku + Waktu)
-        $data = "USER:" . Auth::id() . "|BUKU:" . $buku->id . "|TIME:" . now()->timestamp;
+        if (!$tgl_kembali) {
+            return redirect()->route('user.buku')->with('error', 'Silakan pilih tanggal pengembalian.');
+        }
 
-        // 3. Buat URL API untuk gambar QR
-        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($data);
+        // FORMAT: USER_ID:1|BUKU_ID:5|KEMBALI:2026-02-15
+        $dataQR = "USER_ID:" . $user->id . "|BUKU_ID:" . $buku->id . "|KEMBALI:" . $tgl_kembali;
+        
+        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($dataQR);
 
-        // 4. Kirim ke halaman tiket
-        return view('user.generate-qr', compact('buku', 'qrUrl'));
+        return view('user.generate-qr', compact('buku', 'qrUrl', 'tgl_kembali', 'user'));
     }
 }
