@@ -74,59 +74,68 @@
             color: white;
             position: relative;
             overflow: hidden;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
         .hero-title {
             font-family: 'Playfair Display', serif;
             font-size: 3.5rem;
             line-height: 1.1;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             max-width: 600px;
+            position: relative;
+            z-index: 2;
         }
         .hero-image {
             position: absolute;
             right: 40px; bottom: -20px;
             width: 320px;
             filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+            z-index: 1;
         }
 
-        /* --- SEARCH BAR --- */
-        .search-container {
+        /* --- SEARCH BAR (Inside Hero) --- */
+        .hero-search-container {
             position: relative;
             max-width: 500px;
-            margin-bottom: 40px;
+            z-index: 2;
         }
-        .search-container i {
+        .hero-search-container i {
             position: absolute;
             left: 20px; top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: var(--accent-blue);
         }
-        .search-input {
-            padding: 15px 20px 15px 55px;
+        .hero-search-input {
+            padding: 18px 20px 18px 55px;
             border-radius: 20px;
-            border: 2px solid #f1f5f9;
-            background: #f8fafc;
+            border: none;
+            background: white;
             font-weight: 600;
             width: 100%;
-            transition: 0.3s;
-        }
-        .search-input:focus {
-            background: white;
-            border-color: var(--accent-blue);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             outline: none;
         }
 
-        /* --- CATEGORIES --- */
+        /* --- CATEGORIES SECTION --- */
+        .section-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
         .category-container {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             display: flex; gap: 10px;
             overflow-x: auto;
-            padding-bottom: 10px;
+            scrollbar-width: none;
         }
+        .category-container::-webkit-scrollbar { display: none; }
+        
         .cat-pill {
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 50px;
             border: 1px solid #e2e8f0;
             color: var(--text-muted);
@@ -136,8 +145,9 @@
             white-space: nowrap;
             transition: 0.3s;
             cursor: pointer;
+            background: white;
         }
-        .cat-pill:hover { background: #f1f5f9; }
+        .cat-pill:hover { border-color: var(--accent-blue); color: var(--dark-navy); }
         .cat-pill.active { background: var(--dark-navy); color: white; border-color: var(--dark-navy); }
 
         /* --- BOOK ITEM --- */
@@ -154,11 +164,10 @@
             border: 1px solid #f1f5f9;
             overflow: hidden;
         }
-        .book-cover-wrapper img { max-width: 80%; max-height: 85%; object-fit: contain; border-radius: 8px; }
+        .book-cover-wrapper img { max-width: 80%; max-height: 85%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .book-title { display: block; font-weight: 800; font-size: 1rem; color: var(--dark-navy); margin-top: 5px; }
         .book-author { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
-        /* --- EMPTY STATE (Baru) --- */
         #emptyState {
             display: none;
             text-align: center;
@@ -166,9 +175,8 @@
             padding: 50px 0;
         }
         #emptyState i { font-size: 3rem; color: #e2e8f0; margin-bottom: 15px; }
-        #emptyState h5 { font-weight: 700; color: var(--dark-navy); }
 
-        /* --- MODAL CUSTOM --- */
+        /* --- MODAL --- */
         .book-description {
             font-size: 0.88rem;
             color: var(--text-muted);
@@ -176,12 +184,8 @@
             text-align: justify;
             max-height: 150px;
             overflow-y: auto;
-            padding-right: 10px;
             margin: 20px 0;
         }
-        .book-description::-webkit-scrollbar { width: 4px; }
-        .book-description::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        
         .input-tanggal {
             border: 2px solid #f1f5f9;
             border-radius: 15px;
@@ -198,7 +202,7 @@
         <a class="navbar-brand" href="{{ url('/dashboard') }}">Treasure <span class="text-primary">Library</span></a>
         
         <div class="d-flex align-items-center gap-4">
-            <a href="#" class="text-decoration-none text-dark fw-bold small">My History 📜</a>
+            <a href="{{ route('user.history') }}" class="text-decoration-none text-dark fw-bold small">My History 📜</a>
             
             <div class="dropdown">
                 <div class="user-pill dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown">
@@ -222,18 +226,19 @@
         <div class="hero-badge" style="background: var(--accent-blue); color: white; padding: 6px 16px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-bottom: 25px;">Premium Access</div>
         <h1 class="hero-title">Discover Your Next Masterpiece.</h1>
         <p class="text-white-50 mb-4" style="max-width: 500px;">Eksplorasi koleksi literatur terbaik dunia secara digital dalam satu genggaman.</p>
+        
+        <div class="hero-search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="hero-search-input" placeholder="Cari judul buku atau penulis...">
+        </div>
+
         <img src="https://cdni.iconscout.com/illustration/premium/thumb/online-library-illustration-download-in-svg-png-gif-file-formats--internet-education-learning-study-pack-school-delivery-illustrations-4845517.png" class="hero-image d-none d-lg-block">
     </div>
 
-    <div class="row align-items-center mb-2">
-        <div class="col-md-6">
-            <div class="search-container">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="Cari judul buku atau penulis...">
-            </div>
-        </div>
-        <div class="col-md-6 text-md-end mb-4 mb-md-0">
-            <div class="category-container justify-content-md-end">
+    <div class="row">
+        <div class="col-12">
+            <span class="section-label">Browse by Category</span>
+            <div class="category-container">
                 <div class="cat-pill active" data-filter="all">All Collections</div>
                 @foreach($categories ?? [] as $cat)
                     <div class="cat-pill" data-filter="{{ strtolower($cat->nama) }}">{{ $cat->nama }}</div>
@@ -287,7 +292,7 @@
                     <p class="text-muted small">Karya <span class="text-dark fw-bold">{{ $b->penulis }}</span></p>
 
                     <div class="book-description">
-                        {{ $b->deskripsi ?? 'Belum ada sinopsis untuk buku ini. Silakan hubungi pustakawan untuk informasi lebih lanjut mengenai konten buku.' }}
+                        {{ $b->deskripsi ?? 'Belum ada sinopsis untuk buku ini.' }}
                     </div>
                     
                     <div class="bg-light p-3 rounded-4 mb-4 d-flex justify-content-around text-center">
@@ -313,8 +318,6 @@
                         <button type="submit" class="btn btn-primary w-100 py-3 rounded-4 fw-bold shadow-sm">
                              Konfirmasi & Generate QR <i class="fas fa-qrcode ms-2"></i>
                         </button>
-                        <button type="button" class="btn btn-link w-100 btn-sm mt-2 text-muted text-decoration-none" 
-                                onclick="resetModal({{ $b->id }})">Batal</button>
                     </form>
                 </div>
             </div>
@@ -326,6 +329,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // Logic fitur dipertahankan sepenuhnya
     const searchInput = document.getElementById('searchInput');
     const catPills = document.querySelectorAll('.cat-pill');
     const bookCards = document.querySelectorAll('.book-card');
@@ -353,12 +357,7 @@
             }
         });
 
-        // Cek jika tidak ada buku yang muncul
-        if (visibleCount === 0) {
-            emptyState.style.display = "block";
-        } else {
-            emptyState.style.display = "none";
-        }
+        emptyState.style.display = visibleCount === 0 ? "block" : "none";
     }
 
     searchInput.addEventListener('input', filterBooks);
@@ -389,7 +388,6 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#121826',
-            cancelButtonColor: '#d33',
             confirmButtonText: 'Ya, Logout!',
             cancelButtonText: 'Batal',
             reverseButtons: true

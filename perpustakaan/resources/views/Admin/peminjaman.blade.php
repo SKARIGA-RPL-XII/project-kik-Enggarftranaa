@@ -71,6 +71,66 @@
             min-height: 100vh;
         }
 
+        /* HEADER & SEARCH SECTION */
+        .search-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 54px; /* Disamakan dengan tinggi tombol */
+            padding: 12px 20px 12px 55px;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.1);
+        }
+
+        /* TOMBOL TAMBAH BESAR */
+        .btn-add-large {
+            height: 54px;
+            padding: 0 30px;
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.25);
+            white-space: nowrap;
+        }
+
+        .btn-add-large:hover {
+            background: #3651d1;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.35);
+            color: white;
+        }
+
+        /* TABLE STYLING */
         .table-container {
             background: white;
             border-radius: 28px;
@@ -97,7 +157,7 @@
         }
         .status-dipinjam { background: #e0e7ff; color: #4361ee; }
         .status-kembali { background: #f1f5f9; color: #64748b; }
-        .status-telat { background: #fee2e2; color: #991b1b; }
+        .status-telat { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
 
         .btn-modern {
             border-radius: 12px;
@@ -120,8 +180,17 @@
         .fw-800 { font-weight: 800; }
         .fw-700 { font-weight: 700; }
         .fw-600 { font-weight: 600; }
-        .delay-info { font-size: 0.7rem; font-weight: 700; display: block; margin-top: 4px; }
+        .delay-info { font-size: 0.7rem; font-weight: 800; display: block; margin-top: 4px; }
         .text-primary { color: var(--primary) !important; }
+        
+        .pulse-danger {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -149,31 +218,30 @@
 </div>
 
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-800 mb-1" style="letter-spacing: -1px;">Log Transaksi</h2>
-            <p class="text-muted small mb-0">Admin wajib menekan tombol <b>Terima Fisik</b> untuk memverifikasi pengembalian.</p>
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-4">
+            <h2 class="fw-800 mb-1" style="letter-spacing: -1.5px;">Log Transaksi</h2>
+            <p class="text-muted small mb-0">Total {{ count($peminjamans) }} aktivitas sirkulasi.</p>
         </div>
-        <a href="{{ route('admin.scan') }}" class="btn btn-primary btn-modern shadow-sm px-4 py-2">
-            <i class="fa-solid fa-plus"></i> Tambah Pinjam
-        </a>
+        
+        <div class="col-lg-8">
+            <div class="d-flex gap-3 justify-content-lg-end mt-3 mt-lg-0">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari peminjam atau judul buku...">
+                </div>
+
+                <a href="{{ route('admin.scan') }}" class="btn btn-add-large">
+                    <i class="fa-solid fa-plus fs-5"></i>
+                    <span>Tambah Transaksi</span>
+                </a>
+            </div>
+        </div>
     </div>
-
-    @if(session('success'))
-        <script>
-            Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", timer: 2000, showConfirmButton: false });
-        </script>
-    @endif
-
-    @if(session('error'))
-        <script>
-            Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}", timer: 3000 });
-        </script>
-    @endif
 
     <div class="table-container">
         <div class="table-responsive">
-            <table class="table align-middle">
+            <table class="table align-middle" id="transactionTable">
                 <thead>
                     <tr class="text-muted small fw-bold">
                         <th>ANGGOTA</th>
@@ -188,10 +256,7 @@
                     @php
                         $now = \Carbon\Carbon::now();
                         $tenggat = \Carbon\Carbon::parse($p->tgl_kembali);
-                        
                         $statusClean = strtoupper(trim($p->status));
-                        
-                        // Logika Penentuan Status Terverifikasi
                         $isSelesai = ($statusClean === 'DIKEMBALIKAN' || $statusClean === 'KEMBALI');
                         $isTerlambat = !$isSelesai && $now->gt($tenggat);
                         
@@ -207,20 +272,23 @@
                             <div class="d-flex align-items-center">
                                 <img src="https://ui-avatars.com/api/?background=4361ee&color=fff&name={{ urlencode($p->user->name) }}" class="user-avatar me-3">
                                 <div>
-                                    <div class="fw-700 text-dark mb-0">{{ $p->user->name }}</div>
+                                    <div class="fw-700 text-dark mb-0 search-target-name">{{ $p->user->name }}</div>
                                     <div class="text-muted small" style="font-size: 0.7rem;">{{ $p->user->email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="fw-700 text-primary mb-0">{{ $p->buku->judul }}</div>
+                            <div class="fw-700 text-primary mb-0 search-target-book">{{ $p->buku->judul }}</div>
                             <div class="text-muted small">ID: BK-{{ $p->buku->id }}</div>
                         </td>
                         <td>
-                            <div class="fw-600 {{ $isTerlambat ? 'text-danger' : '' }} mb-0">
+                            <div class="fw-600 {{ $isTerlambat ? 'text-danger pulse-danger' : '' }} mb-0">
                                 {{ $tenggat->format('d M Y') }}
+                                @if($isTerlambat) <i class="fa-solid fa-circle-exclamation ms-1"></i> @endif
                             </div>
-                            <small class="text-muted small">{{ $tenggat->format('H:i') }} WIB</small>
+                            <small class="{{ $isTerlambat ? 'text-danger' : 'text-muted' }} small">
+                                {{ $tenggat->format('H:i') }} WIB
+                            </small>
                         </td>
                         <td class="text-center">
                             @if($isSelesai)
@@ -264,6 +332,22 @@
 </div>
 
 <script>
+    // FITUR SEARCH JAVASCRIPT
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#transactionTable tbody tr');
+        rows.forEach(row => {
+            let nameText = row.querySelector('.search-target-name')?.textContent.toLowerCase() || "";
+            let bookText = row.querySelector('.search-target-book')?.textContent.toLowerCase() || "";
+            if (nameText.includes(filter) || bookText.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+
+    // Alert Verifikasi & Logout Tetap Sama (SweetAlert2)
     function confirmReturn(id, judul) {
         Swal.fire({
             title: 'Verifikasi Buku',
@@ -276,9 +360,8 @@
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Tampilkan loading saat proses
                 Swal.fire({
-                    title: 'Sedang Memproses...',
+                    title: 'Memproses...',
                     allowOutsideClick: false,
                     didOpen: () => { Swal.showLoading(); }
                 });

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\File;
 use App\Models\Buku;
 use App\Models\Category;
 use App\Models\Peminjaman;
@@ -13,18 +11,17 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
+    /**
+     * Halaman Utama Admin
+     */
     public function dashboard()
     {
         return view('admin.dashboard');
     }
 
     /* |--------------------------------------------------------------------------
-    | LOGIKA DATA BUKU (MANUAL)
-    |--------------------------------------------------------------------------
-    | Catatan: Jika Anda menggunakan Resource Controller (BukuController),
-    | method di bawah ini mungkin tidak terpakai lewat route resource, 
-    | tapi saya biarkan di sini sesuai permintaan Anda.
-    */
+    | LOGIKA DATA BUKU
+    |-------------------------------------------------------------------------- */
 
     public function dataBuku()
     {
@@ -95,17 +92,15 @@ class AdminController extends Controller
     }
 
     /* |--------------------------------------------------------------------------
-    | LOGIKA SCANNER QR (FIXED & MATCHED WITH JS)
-    |--------------------------------------------------------------------------
-    */
+    | LOGIKA SCANNER QR & PROSES PINJAM
+    |-------------------------------------------------------------------------- */
 
     public function showScanner() {
         return view('admin.scan');
     }
 
     /**
-     * AJAX: Fungsi ini dipanggil oleh fetch() di admin/scan.blade.php
-     * Mengembalikan JSON data User dan Buku
+     * AJAX: Mengambil data detail user dan buku untuk tampilan konfirmasi scan
      */
     public function getDataScan($user_id, $buku_id) {
         $user = User::find($user_id);
@@ -118,28 +113,25 @@ class AdminController extends Controller
             ]);
         }
 
-        // PENTING: Struktur JSON ini disesuaikan dengan scan.blade.php
         return response()->json([
             'success' => true,
             'user' => [
-                'id_asli' => $user->id, // Dipakai di input hidden user_id_input
+                'id_asli' => $user->id,
                 'nama' => $user->name,
                 'email' => $user->email,
-                // Gunakan foto avatar atau default UI Avatars jika null
                 'foto' => $user->avatar ? asset('storage/'.$user->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=1e40af&color=fff',
             ],
             'buku' => [
-                'id' => $buku->id, // Dipakai di input hidden buku_id_input
+                'id' => $buku->id,
                 'judul' => $buku->judul,
-                'kode' => $buku->kode ?? 'BOOK-'.$buku->id, // Handle jika kolom kode kosong
-                // Gunakan cover buku atau placeholder abu-abu
+                'kode' => $buku->kode ?? 'BOOK-'.$buku->id,
                 'cover_url' => $buku->cover ? asset('storage/'.$buku->cover) : 'https://placehold.co/150x200?text=No+Cover',
             ]
         ]);
     }
 
     /**
-     * Menyimpan data transaksi peminjaman ke database
+     * Menyimpan transaksi ke database & Memberikan Alert "Selamat Membaca"
      */
     public function prosesPinjam(Request $request) {
         $request->validate([
@@ -148,7 +140,6 @@ class AdminController extends Controller
             'tgl_kembali' => 'required|date'
         ]);
 
-        // Cek stok sebelum meminjam
         $buku = Buku::find($request->buku_id);
         if($buku->stok < 1) {
             return redirect()->back()->with('error', 'Gagal! Stok buku habis.');
@@ -160,12 +151,14 @@ class AdminController extends Controller
             'buku_id' => $request->buku_id,
             'tgl_pinjam' => now(),
             'tgl_kembali' => $request->tgl_kembali,
-            'status' => 'dipinjam' // Pastikan kolom ini ada di tabel database Anda
+            'status' => 'dipinjam'
         ]);
 
         // Kurangi Stok
         $buku->decrement('stok');
 
-        return redirect()->route('admin.scan')->with('success', 'Transaksi Peminjaman Berhasil!');
+        // Redirect dengan pesan custom sesuai permintaan Anda
+        return redirect()->route('admin.scan')->with('approve_success', 'Selamat membaca! Kalau sudah selesai jangan lupa dikembalikan yaa 😊');
     }
+    
 }

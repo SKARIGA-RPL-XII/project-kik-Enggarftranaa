@@ -208,7 +208,7 @@
             <a href="{{ route('admin.scan') }}">
                 <span class="sidebar-icon"><i class="fa-solid fa-qrcode"></i></span> Scan Pinjam
             </a>
-            <a href="#">
+    <a href="/admin/peminjaman">
                 <span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Riwayat
             </a>
         </nav>

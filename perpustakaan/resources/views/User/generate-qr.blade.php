@@ -55,9 +55,51 @@
         </div>
 
         <button onclick="window.print()" class="btn btn-print mb-2">Print Ticket</button>
-        <a href="/user/dashboard" class="btn btn-link btn-sm w-100 text-decoration-none text-muted">Back to Catalog</a>
+        <a href="{{ route('user.dashboard') }}" class="btn btn-link btn-sm w-100 text-decoration-none text-muted">Back to Catalog</a>
     </div>
 </div>
+
+<<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function startPolling() {
+        const bukuId = "{{ $buku->id }}";
+        const url = "{{ route('user.cek.status', ':id') }}".replace(':id', bukuId);
+
+        console.log("Memulai polling ke: " + url);
+
+        const interval = setInterval(() => {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Cek di Console F12, pastikan muncul: {approved: true} saat admin sudah klik
+                    console.log("Respon server:", data); 
+
+                    if (data.approved === true) {
+                        clearInterval(interval);
+                        
+                        // Alert sederhana untuk tes jika SweetAlert gagal
+                        console.log("Alert dipicu!"); 
+
+                        Swal.fire({
+                            title: 'Berhasil Dipinjam!',
+                            text: 'Selamat membaca! Jangan lupa dikembalikan yaa 😊',
+                            icon: 'success',
+                            confirmButtonColor: '#0f172a',
+                            confirmButtonText: 'Ke Dashboard',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            window.location.href = "{{ route('user.dashboard') }}";
+                        });
+                    }
+                })
+                .catch(err => console.error("Polling Error:", err));
+        }, 3000); // Cek tiap 3 detik
+    }
+
+    // Pastikan fungsi dipanggil
+    window.onload = startPolling;
+</script>
 
 </body>
 </html>

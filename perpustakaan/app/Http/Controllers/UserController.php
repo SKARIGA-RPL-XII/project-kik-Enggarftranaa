@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Buku; 
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Peminjaman; // Pastikan model ini di-import
 
 class UserController extends Controller
 {
@@ -32,19 +33,17 @@ class UserController extends Controller
             'password' => 'required|min:8',
         ]);
 
-        // Karena Model User menggunakan cast 'hashed', 
-        // kita CUKUP mengirim teks biasa, Laravel akan meng-hash otomatis.
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password, 
-            'role' => 'user', // Sesuaikan dengan kebutuhan role Anda
+            'role' => 'user',
         ]);
 
         return redirect()->back()->with('success', 'Anggota baru berhasil didaftarkan!');
     }
 
-    // Memperbarui data anggota (Nama & Email)
+    // Memperbarui data anggota
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -70,12 +69,10 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Akun anggota telah dihapus.');
     }
 
-    // Reset password ke default: 12345678
+    // Reset password ke default
     public function resetPassword($id)
     {
         $user = User::findOrFail($id);
-        
-        // PENTING: Jangan gunakan Hash::make di sini agar tidak double hash
         $user->update([
             'password' => '12345678' 
         ]);
@@ -122,5 +119,24 @@ class UserController extends Controller
 
         $buku = $query->latest()->get();
         return view('user.buku', compact('buku', 'categories'));
+    }
+
+    public function cekStatusPinjam($buku_id)
+    {
+        // Menggunakan Auth::id() untuk menghindari error 'Undefined method id'
+        $userId = Auth::id();
+
+        $cek = Peminjaman::where('user_id', $userId)
+                ->where('buku_id', $buku_id)
+                ->whereIn('status', ['dipinjam', 'Dipinjam', 'PINJAM'])
+                // Opsional: Hapus baris di bawah jika ingin mengecek tanpa batas waktu 10 menit
+                ->where('created_at', '>=', now()->subMinutes(10))
+                ->first();
+
+        if ($cek) {
+            return response()->json(['approved' => true]);
+        }
+
+        return response()->json(['approved' => false]);
     }
 }
