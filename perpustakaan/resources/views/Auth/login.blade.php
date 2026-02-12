@@ -12,7 +12,7 @@
             --primary-dark: #0f172a; /* Midnight Blue */
             --accent-blue: #3b82f6;  /* Royal Blue */
             --soft-blue: #dbeafe;
-            --gold-accent: #fbbf24; /* Sedikit sentuhan emas untuk kesan mewah */
+            --gold-accent: #fbbf24; 
         }
 
         * {
@@ -37,7 +37,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); /* Potongan miring modern */
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
         }
 
         .left-content {
@@ -133,7 +133,7 @@
             outline: none;
         }
 
-        /* Tombol Mewah */
+        /* Tombol */
         .btn-login {
             background: var(--primary-dark);
             color: white;
@@ -142,7 +142,7 @@
             font-weight: 600;
             font-size: 1rem;
             border: none;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             margin-top: 10px;
         }
@@ -164,7 +164,7 @@
         /* Responsif */
         @media (max-width: 768px) {
             .left-panel {
-                display: none; /* Sembunyikan panel kiri di HP untuk fokus ke login */
+                display: none;
             }
             .right-panel {
                 height: 100vh;
@@ -192,7 +192,7 @@
         <div class="col-lg-5 col-md-6 right-panel">
             <div class="login-box">
                 <h2>Selamat Datang</h2>
-                <p class="subtitle">Silahkan masuk ke akun Anda atau <a href="/register" class="text-primary fw-semibold text-decoration-none">Daftar Akun Baru</a></p>
+                <p class="subtitle">Silahkan masuk ke akun Anda untuk mengakses layanan digital.</p>
 
                 @if(session('error'))
                     <div class="alert alert-danger border-0 shadow-sm" style="border-radius: 10px;">
@@ -211,7 +211,6 @@
                     <div class="input-group-custom">
                         <div class="d-flex justify-content-between">
                             <label class="form-label">KATA SANDI</label>
-                            <a href="#" class="text-decoration-none" style="font-size: 0.75rem; color: #64748b;">Lupa Password?</a>
                         </div>
                         <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                     </div>

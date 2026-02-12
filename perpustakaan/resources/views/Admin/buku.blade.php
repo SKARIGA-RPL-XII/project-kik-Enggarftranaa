@@ -17,201 +17,138 @@
             --dark-sidebar: #111827; 
             --bg-light: #f8fafc; 
             --danger: #ef4444; 
+            --sidebar-width: 280px;
+            --sidebar-mini-width: 100px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body { 
             background-color: var(--bg-light); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #1e293b;
+            margin: 0;
+            overflow-x: hidden;
         }
 
-        /* SIDEBAR */
+        /* --- SIDEBAR SYSTEM --- */
         .sidebar { 
-            height: 100vh; 
-            background: var(--dark-sidebar); 
-            color: #fff; 
-            position: fixed; 
-            width: 280px; 
-            z-index: 1000;
-            padding: 40px 24px;
-            display: flex;
-            flex-direction: column;
+            height: 100vh; background: var(--dark-sidebar); color: #fff; 
+            position: fixed; width: var(--sidebar-width); z-index: 1000;
+            padding: 30px 20px; display: flex; flex-direction: column;
+            transition: var(--transition); overflow: hidden;
         }
+        body.sidebar-mini .sidebar { width: var(--sidebar-mini-width); padding: 30px 15px; }
 
         .sidebar-brand {
-            font-weight: 800;
-            font-size: 1.25rem;
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            padding: 0 10px 40px;
-            letter-spacing: 1px;
+            font-weight: 800; font-size: 1.2rem; color: white; text-decoration: none;
+            display: flex; align-items: center; padding: 10px; margin-bottom: 40px; gap: 12px;
         }
-        .sidebar-brand span { color: #4e60ff; }
+        .brand-logo-box {
+            width: 45px; height: 45px; background: var(--primary); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+        }
+        body.sidebar-mini .sidebar-brand span:not(.brand-logo-box) { display: none; }
 
         .sidebar-category {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #4b5563;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin: 20px 0 12px 12px;
+            font-size: 0.7rem; font-weight: 800; color: #4b5563; text-transform: uppercase;
+            letter-spacing: 1.5px; margin: 25px 0 12px 15px; white-space: nowrap;
         }
-
-        .sidebar-menu { flex-grow: 1; }
+        body.sidebar-mini .sidebar-category { display: none; }
 
         .sidebar a { 
-            color: #94a3b8; 
-            display: flex; 
-            align-items: center; 
-            padding: 16px 20px; 
-            text-decoration: none; 
-            border-radius: 16px; 
-            margin-bottom: 4px; 
-            font-size: 0.95rem; 
-            font-weight: 600;
-            transition: 0.3s; 
+            color: #94a3b8; display: flex; align-items: center; padding: 16px; 
+            text-decoration: none; border-radius: 18px; margin-bottom: 8px; 
+            font-size: 0.95rem; font-weight: 600; transition: var(--transition);
         }
+        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .sidebar a.active { background: var(--primary); color: white; box-shadow: 0 10px 25px -5px var(--primary-glow); }
 
-        .sidebar a:hover { color: #fff; background: rgba(255,255,255,0.02); }
+        .sidebar-icon { min-width: 35px; font-size: 1.3rem; display: flex; justify-content: center; align-items: center; margin-right: 15px; }
+        body.sidebar-mini .sidebar-icon { margin-right: 0; min-width: 100%; }
+        body.sidebar-mini .sidebar a span:not(.sidebar-icon) { display: none; }
 
-        .sidebar a.active { 
-            background: var(--primary); 
-            color: white; 
-            box-shadow: 0 10px 20px -5px var(--primary-glow); 
+        /* --- LAYOUT & CONTENT --- */
+        .top-navbar {
+            position: fixed; top: 0; right: 0; left: var(--sidebar-width);
+            height: 85px; background: rgba(248, 250, 252, 0.9); backdrop-filter: blur(10px);
+            display: flex; align-items: center; padding: 0 40px; z-index: 999;
+            transition: var(--transition); border-bottom: 1px solid #eef2f6;
         }
+        body.sidebar-mini .top-navbar { left: var(--sidebar-mini-width); }
 
-        .sidebar-icon { 
-            width: 28px; 
-            font-size: 1.15rem; 
-            margin-right: 12px; 
-            display: flex;
-            justify-content: center;
-        }
+        .main-content { margin-left: var(--sidebar-width); padding: 125px 40px 40px; transition: var(--transition); }
+        body.sidebar-mini .main-content { margin-left: var(--sidebar-mini-width); }
 
-        .sidebar-footer { margin-top: auto; padding: 10px; }
-
-        .btn-signout {
-            width: 100%;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: none;
-            padding: 14px;
-            border-radius: 14px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.3s;
-            text-decoration: none;
-        }
-        .btn-signout:hover { background: var(--danger); color: white; }
-
-        /* CONTENT AREA */
-        .main-content { margin-left: 280px; padding: 50px; }
+        /* UI COMPONENTS */
+        .search-wrapper { position: relative; width: 320px; }
+        .search-wrapper i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-input { padding: 14px 20px 14px 50px !important; border: 1px solid #e2e8f0 !important; border-radius: 16px !important; }
         
-        /* SEARCH BAR */
-        .search-wrapper {
-            position: relative;
-            width: 320px;
-        }
-        .search-wrapper i {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
-        .search-input {
-            padding: 14px 20px 14px 50px !important;
-            border: none !important;
-            background: white !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-            border-radius: 16px !important;
-        }
-
-        /* TABLE & UI ENHANCEMENT */
         .table-container { 
-            background: white; 
-            border-radius: 30px; 
-            padding: 35px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
-            border: 1px solid rgba(0,0,0,0.02);
+            background: white; border-radius: 28px; padding: 35px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.02); border: 1px solid #f1f5f9;
         }
-
-        .book-img {
-            width: 50px; height: 72px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .badge-category {
-            background: #eef2ff;
-            color: #4e60ff;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
+        .book-img { width: 50px; height: 72px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .badge-category { background: #eef2ff; color: #4e60ff; padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .sidebar-toggle { background: white; border: 1px solid #e2e8f0; width: 42px; height: 42px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-modern { border-radius: 16px; padding: 12px 24px; font-weight: 700; transition: 0.3s; }
-        
-        .modal-content { border-radius: 32px; border: none; padding: 10px; }
-        .form-control, .form-select { border-radius: 14px; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
 
 <aside class="sidebar">
     <a href="#" class="sidebar-brand">
-        TREASURE<span>LIB</span>
+        <span class="brand-logo-box"><i class="fa-solid fa-record-vinyl"></i></span>
+        <span>TREASURE<span style="color:var(--primary)">LIB</span></span>
     </a>
 
     <div class="sidebar-menu">
         <div class="sidebar-category">Analytics</div>
         <nav>
             <a href="{{ route('admin.dashboard') }}">
-                <span class="sidebar-icon"><i class="fa-solid fa-chart-line"></i></span> Dashboard
+                <span class="sidebar-icon"><i class="fa-solid fa-chart-pie"></i></span>
+                <span>Dashboard</span>
             </a>
         </nav>
 
         <div class="sidebar-category">Management</div>
         <nav>
             <a href="/admin/user">
-                <span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> Data Anggota
+                <span class="sidebar-icon"><i class="fa-solid fa-users-viewfinder"></i></span>
+                <span>Data Anggota</span>
             </a>
             <a href="{{ route('admin.buku.index') }}" class="active">
-                <span class="sidebar-icon"><i class="fa-solid fa-book-bookmark"></i></span> Koleksi Buku
+                <span class="sidebar-icon"><i class="fa-solid fa-book"></i></span>
+                <span>Koleksi Buku</span>
             </a>
             <a href="{{ route('admin.kategori.index') }}">
-                <span class="sidebar-icon"><i class="fa-solid fa-layer-group"></i></span> Kelola Kategori
+                <span class="sidebar-icon"><i class="fa-solid fa-layer-group"></i></span>
+                <span>Kelola Kategori</span>
             </a>
         </nav>
 
         <div class="sidebar-category">Operation</div>
         <nav>
             <a href="{{ route('admin.scan') }}">
-                <span class="sidebar-icon"><i class="fa-solid fa-qrcode"></i></span> Scan Pinjam
+                <span class="sidebar-icon"><i class="fa-solid fa-qrcode"></i></span>
+                <span>Scan Pinjam</span>
             </a>
             <a href="{{ route('admin.peminjaman.index') }}">
-                <span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Riwayat
+                <span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <span>Riwayat</span>
             </a>
         </nav>
     </div>
-
-    <div class="sidebar-footer">
-        <form action="/logout" method="POST">
-            @csrf
-            <button type="submit" class="btn-signout">
-                <i class="fa-solid fa-right-from-bracket"></i> Sign Out System
-            </button>
-        </form>
-    </div>
 </aside>
+
+<nav class="top-navbar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <div class="ms-4 fw-700 text-muted d-none d-md-block">
+        Admin Panel <span class="mx-2 text-light-emphasis">/</span> <span class="text-dark fw-800">Koleksi Buku</span>
+    </div>
+</nav>
 
 <main class="main-content">
     <div class="d-flex justify-content-between align-items-end mb-5">
@@ -222,25 +159,17 @@
         <div class="d-flex gap-3">
             <div class="search-wrapper">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="bookSearch" class="form-control search-input" placeholder="Cari judul, penulis, atau kategori...">
+                <input type="text" id="bookSearch" class="form-control search-input" placeholder="Cari buku...">
             </div>
-
             <button class="btn btn-primary btn-modern shadow" data-bs-toggle="modal" data-bs-target="#addBookModal">
-                <i class="fa-solid fa-plus me-2"></i> Tambah Koleksi Baru
+                <i class="fa-solid fa-plus me-2"></i> Tambah Koleksi
             </button>
         </div>
     </div>
 
     @if(session('success'))
         <script>
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-            Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", timer: 3000, showConfirmButton: false });
         </script>
     @endif
 
@@ -249,39 +178,31 @@
             <table class="table align-middle" id="bookTable">
                 <thead>
                     <tr class="text-muted small fw-bold">
-                        <th class="ps-0">VISUAL</th>
+                        <th>VISUAL</th>
                         <th>DETAIL BUKU</th>
                         <th>KATEGORI</th>
                         <th class="text-center">STOK</th>
-                        <th class="text-end pe-0">AKSI</th>
+                        <th class="text-end">AKSI</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($buku as $item)
                     <tr class="book-row">
-                        <td class="ps-0">
-                            <img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/50x70' }}" class="book-img">
-                        </td>
+                        <td><img src="{{ $item->cover ? asset('storage/' . $item->cover) : 'https://via.placeholder.com/50x70' }}" class="book-img"></td>
                         <td>
-                            <div class="fw-800 text-dark mb-0 book-title">{{ $item->judul }}</div>
-                            <div class="text-muted small fw-600">Oleh: <span class="book-author">{{ $item->penulis }}</span></div>
+                            <div class="fw-800 text-dark book-title">{{ $item->judul }}</div>
+                            <div class="text-muted small">Oleh: <span class="book-author">{{ $item->penulis }}</span></div>
                         </td>
-                        <td>
-                            <span class="badge-category book-category">{{ $item->kategori->nama ?? 'Umum' }}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="fw-800 {{ $item->stok < 5 ? 'text-danger' : 'text-primary' }}">{{ $item->stok }}</span>
-                        </td>
-                        <td class="text-end pe-0">
+                        <td><span class="badge-category book-category">{{ $item->kategori->nama ?? 'Umum' }}</span></td>
+                        <td class="text-center fw-800 {{ $item->stok < 5 ? 'text-danger' : 'text-primary' }}">{{ $item->stok }}</td>
+                        <td class="text-end">
                             <div class="d-flex justify-content-end gap-2">
                                 <button class="btn btn-sm btn-light border fw-bold rounded-3 px-3 py-2" data-bs-toggle="modal" data-bs-target="#editBookModal{{ $item->id }}">
-                                    <i class="fa-solid fa-pen-to-square me-1 text-primary"></i> Edit
+                                    <i class="fa-solid fa-pen-to-square text-primary"></i>
                                 </button>
-                                
                                 <form action="{{ route('admin.buku.destroy', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}">
                                     @csrf @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-3 px-3 py-2" 
-                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->judul }}')">
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold rounded-3 px-3 py-2" onclick="confirmDelete('{{ $item->id }}', '{{ $item->judul }}')">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </form>
@@ -319,14 +240,14 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer border-0">
-                                        <button type="submit" class="btn btn-primary btn-modern w-100 shadow">Simpan Perubahan</button>
+                                        <button type="submit" class="btn btn-primary btn-modern w-100">Simpan Perubahan</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                     @empty
-                    <tr id="empty-row"><td colspan="5" class="text-center py-5 text-muted fw-bold">Belum ada koleksi di rak perpustakaan.</td></tr>
+                    <tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Belum ada koleksi.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -361,11 +282,11 @@
                         <div class="col-md-3"><label class="form-label small fw-bold text-muted">UPLOAD COVER</label>
                             <input type="file" name="cover" class="form-control"></div>
                         <div class="col-12"><label class="form-label small fw-bold text-muted">SINOPSIS</label>
-                            <textarea name="deskripsi" class="form-control" rows="3" placeholder="Masukkan deskripsi singkat buku..."></textarea></div>
+                            <textarea name="deskripsi" class="form-control" rows="3"></textarea></div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-primary btn-modern w-100 shadow">Simpan ke Database</button>
+                    <button type="submit" class="btn btn-primary btn-modern w-100">Simpan ke Database</button>
                 </div>
             </form>
         </div>
@@ -375,57 +296,31 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// FUNGSI PENCARIAN BUKU
-document.getElementById('bookSearch').addEventListener('keyup', function() {
-    let searchValue = this.value.toLowerCase();
-    let rows = document.querySelectorAll('.book-row');
-    let matchFound = false;
+    function toggleSidebar() { document.body.classList.toggle('sidebar-mini'); }
 
-    rows.forEach(row => {
-        let title = row.querySelector('.book-title').textContent.toLowerCase();
-        let author = row.querySelector('.book-author').textContent.toLowerCase();
-        let category = row.querySelector('.book-category').textContent.toLowerCase();
-
-        if (title.includes(searchValue) || author.includes(searchValue) || category.includes(searchValue)) {
-            row.style.display = "";
-            matchFound = true;
-        } else {
-            row.style.display = "none";
-        }
+    document.getElementById('bookSearch').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('.book-row');
+        rows.forEach(row => {
+            let title = row.querySelector('.book-title').textContent.toLowerCase();
+            let author = row.querySelector('.book-author').textContent.toLowerCase();
+            row.style.display = (title.includes(searchValue) || author.includes(searchValue)) ? "" : "none";
+        });
     });
 
-    // Menampilkan pesan jika tidak ada hasil
-    let existingNoResult = document.getElementById('no-search-results');
-    if (!matchFound && searchValue !== "") {
-        if (!existingNoResult) {
-            let tbody = document.querySelector('#bookTable tbody');
-            let tr = document.createElement('tr');
-            tr.id = 'no-search-results';
-            tr.innerHTML = `<td colspan="5" class="text-center py-5 text-muted fw-600">Buku dengan kata kunci "${searchValue}" tidak ditemukan.</td>`;
-            tbody.appendChild(tr);
-        }
-    } else {
-        if (existingNoResult) existingNoResult.remove();
+    function confirmDelete(id, title) {
+        Swal.fire({
+            title: 'Hapus Koleksi?',
+            text: `Buku "${title}" akan dihapus permanen.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) { document.getElementById('delete-form-' + id).submit(); }
+        })
     }
-});
-
-function confirmDelete(id, title) {
-    Swal.fire({
-        title: 'Hapus Koleksi?',
-        text: `Buku "${title}" akan dihapus permanen.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal',
-        customClass: { popup: 'rounded-24' }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('delete-form-' + id).submit();
-        }
-    })
-}
 </script>
 </body>
 </html>
