@@ -18,7 +18,7 @@
         Route::post('/logout', 'logout')->name('logout');
     });
 
-    // --- PROTECTED ROUTES (LOGIN REQUIRED) ---
+    //
     Route::middleware('auth')->group(function () {
 
         // 1. PROFILE
@@ -27,7 +27,7 @@
             Route::patch('/profile/update', 'update')->name('profile.update');
         });
 
-        // 2. USER SIDE (PEMINJAM)
+        // 2. USER DASHBOARD
         Route::prefix('user')->name('user.')->group(function () {
             Route::get('/dashboard', [BukuController::class, 'indexUser'])->name('dashboard');
             Route::get('/buku', [BukuController::class, 'indexUser'])->name('buku');
@@ -40,7 +40,7 @@
             Route::get('/pinjam/tiket/{id}', [QRController::class, 'generateTicket'])->name('generate.qr');
         });
 
-        // 3. ADMIN SIDE (PUSTAKAWAN)
+        // 3. ADMIN DASHBOARD
         Route::prefix('admin')->name('admin.')->group(function () {
             // Dashboard Admin
             Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -51,7 +51,7 @@
             Route::resource('user', UserController::class);
             Route::put('user/{id}/reset', [UserController::class, 'resetPassword'])->name('user.reset');
 
-            // Fitur Scanner (Diurus oleh AdminController atau PeminjamanController)
+            // Fitur Scanner 
             Route::get('/scan', [AdminController::class, 'showScanner'])->name('scan');
             Route::get('/get-peminjam/{user_id}/{buku_id}', [AdminController::class, 'getDataScan']);
             Route::post('/proses-pinjam', [AdminController::class, 'prosesPinjam'])->name('proses.pinjam');
@@ -65,22 +65,19 @@
             Route::get('/user/cek-status/{buku_id}', [App\Http\Controllers\UserController::class, 'cekStatusPinjam'])->name('user.cek.status');
         });Route::middleware(['auth'])->group(function () {
         
-        // Route ini yang dicari oleh JavaScript di Blade tadi
+      
         Route::get('/user/cek-status/{buku_id}', [UserController::class, 'cekStatusPinjam'])->name('user.cek.status');
 
-        // Pastikan route dashboard juga memiliki nama yang sesuai
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 
-        // Tambahkan 2 baris ini
       Route::prefix('admin')->name('admin.')->group(function () {
-    // ... rute admin lainnya (dashboard, buku, dll) ...
 
     // Log Peminjaman Admin
     Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
     
-    // --- TAMBAHKAN RUTE PDF DI SINI ---
+
     Route::get('/report/peminjaman/pdf', [PeminjamanController::class, 'exportPdf'])->name('report.pdf');
-    // ----------------------------------
+
 
     Route::post('/peminjaman/kembalikan/{id}', [PeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
     Route::delete('/peminjaman/{id}', [PeminjamanController::class, 'destroy'])->name('peminjaman.destroy');
