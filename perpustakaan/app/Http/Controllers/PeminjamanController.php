@@ -4,18 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Peminjaman;
+use App\Models\Category;
 use App\Models\Buku;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $peminjamans = Peminjaman::with(['user', 'buku'])->latest()->get();
-        return view('admin.peminjaman', compact('peminjamans'));
+       $query = Peminjaman::with(['user', 'buku']);
+
+    // 2. LOGIKA FILTER TANGGAL (Pusat perbaikan)
+    if ($request->filled('start_date') && $request->filled('end_date')) {
+        // Memfilter data berdasarkan kolom tgl_pinjam di antara tanggal start dan end
+        $query->whereBetween('tgl_pinjam', [$request->start_date, $request->end_date]);
     }
+
+    // 3. Ambil hasil akhirnya
+    $peminjamans = $query->latest()->get();
+
+    // 4. Kirim ke view (Pastikan nama variabel 'peminjamans' sama dengan di Blade)
+    return view('admin.peminjaman', compact('peminjamans'));
+    }
+    
 
     public function scan()
     {
@@ -135,5 +149,23 @@ class PeminjamanController extends Controller
         ->get();
 
     return view('user.history', compact('peminjamans'));
+}
+public function exportPdf(Request $request)
+{
+    $start = $request->query('start_date');
+    $end = $request->query('end_date');
+
+    if (!$start || !$end) {
+        return redirect()->back()->with('error', 'Silakan pilih rentang tanggal.');
+    }
+
+    $peminjamans = Peminjaman::with(['user', 'buku'])
+        ->whereBetween('tgl_pinjam', [$start, $end])
+        ->get();
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.pdf', compact('peminjamans', 'start', 'end'));
+    
+    // GANTI stream() MENJADI download()
+    return $pdf->download('Laporan-Peminjaman-' . $start . '-ke-' . $end . '.pdf');
 }
 }

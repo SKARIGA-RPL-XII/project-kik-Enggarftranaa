@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -41,7 +42,7 @@
             transition: var(--transition);
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Mencegah elemen bocor saat transisi */
+            overflow: hidden;
         }
 
         body.sidebar-mini .sidebar {
@@ -69,7 +70,7 @@
         .sidebar-brand i { 
             color: var(--primary-blue); 
             font-size: 1.8rem; 
-            min-width: 45px; /* Menjaga logo tetap di tengah saat mini */
+            min-width: 45px;
             display: flex;
             justify-content: center;
         }
@@ -116,7 +117,7 @@
         }
 
         .sidebar-icon { 
-            min-width: 45px; /* Kunci agar ikon selalu center */
+            min-width: 45px;
             display: flex;
             justify-content: center;
             font-size: 1.2rem;
@@ -135,12 +136,11 @@
 
         .btn-logout:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-        /* --- FIX UNTUK MODE MINI --- */
         body.sidebar-mini .sidebar-brand span, 
         body.sidebar-mini .menu-label, 
         body.sidebar-mini .sidebar a span:not(.sidebar-icon),
         body.sidebar-mini .btn-logout span {
-            display: none; /* Hilangkan teks sepenuhnya agar tidak berantakan */
+            display: none;
         }
 
         body.sidebar-mini .sidebar a, 
@@ -197,6 +197,10 @@
             display: flex; align-items: center; box-shadow: var(--card-shadow);
         }
         .stat-icon { width: 55px; height: 55px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-right: 18px; font-size: 1.2rem; }
+        
+        .bg-soft-blue { background: rgba(67, 97, 238, 0.1); color: #4361ee; }
+        .bg-soft-emerald { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .bg-soft-amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -212,25 +216,25 @@
         <div class="sidebar-menu">
             <div class="menu-label">Analytics</div>
             <nav>
-                <a href="/admin/dashboard" class="active">
+                <a href="{{ url('/admin/dashboard') }}" class="active">
                     <span class="sidebar-icon"><i class="fa-solid fa-chart-pie"></i></span>
                     <span>Dashboard</span>
                 </a>
                 <div class="menu-label">Management</div>
-                <a href="/admin/user">
+                <a href="{{ url('/admin/user') }}">
                     <span class="sidebar-icon"><i class="fa-solid fa-users"></i></span> 
                     <span>Members</span>
                 </a>
-                <a href="/admin/buku">
+                <a href="{{ url('/admin/buku') }}">
                     <span class="sidebar-icon"><i class="fa-solid fa-book"></i></span> 
                     <span>Collection</span>
                 </a>
                 <div class="menu-label">Operations</div>
-                <a href="/admin/scan">
+                <a href="{{ url('/admin/scan') }}">
                     <span class="sidebar-icon"><i class="fa-solid fa-qrcode"></i></span> 
                     <span>QR Scanner</span>
                 </a>
-                <a href="/admin/peminjaman">
+                <a href="{{ url('/admin/peminjaman') }}">
                     <span class="sidebar-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> 
                     <span>Activity Logs</span>
                 </a>
@@ -274,19 +278,44 @@
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon bg-soft-blue"><i class="fa-solid fa-users"></i></div>
-                    <div><h6 class="text-muted small fw-bold mb-1">MEMBERS</h6><h4 class="fw-800 mb-0">1,240</h4></div>
+                    <div>
+                        <h6 class="text-muted small fw-bold mb-1">MEMBERS</h6>
+                        <h4 class="fw-800 mb-0">{{ number_format($totalMembers ?? 0) }}</h4>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon bg-soft-emerald"><i class="fa-solid fa-book"></i></div>
-                    <div><h6 class="text-muted small fw-bold mb-1">BOOKS</h6><h4 class="fw-800 mb-0">3,502</h4></div>
+                    <div>
+                        <h6 class="text-muted small fw-bold mb-1">BOOKS</h6>
+                        <h4 class="fw-800 mb-0">{{ number_format($totalBooks ?? 0) }}</h4>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon bg-soft-amber"><i class="fa-solid fa-rotate"></i></div>
-                    <div><h6 class="text-muted small fw-bold mb-1">LOANS</h6><h4 class="fw-800 mb-0">452</h4></div>
+                    <div>
+                        <h6 class="text-muted small fw-bold mb-1">LOANS</h6>
+                        <h4 class="fw-800 mb-0">{{ number_format($totalLoans ?? 0) }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="bg-white p-4 rounded-4 shadow-sm border">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-800 mb-0">Most Borrowed Books</h4>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light rounded-3" type="button">All Time</button>
+                        </div>
+                    </div>
+                    <div style="height: 350px;">
+                        <canvas id="mostBorrowedChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -304,9 +333,9 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="small fw-bold">Andi Wibowo</td>
-                            <td class="small">Feb 11, 2026 - 09:00</td>
-                            <td class="text-center"><span class="badge bg-success rounded-pill px-3">SUCCESS</span></td>
+                            <td class="small fw-bold">System Admin</td>
+                            <td class="small">{{ date('M d, Y - H:i') }}</td>
+                            <td class="text-center"><span class="badge bg-success rounded-pill px-3">ONLINE</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -315,24 +344,20 @@
     </main>
 
     <script>
-        // 1. Toggle Sidebar Function
         function toggleSidebar() { 
             document.body.classList.toggle('sidebar-mini'); 
         }
 
-        // 2. Real-time Clock Function
         function updateClock() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const dateStr = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-            
             document.getElementById('realtime-clock').textContent = timeStr;
             document.getElementById('realtime-date').textContent = dateStr;
         }
         setInterval(updateClock, 1000); 
         updateClock();
 
-        // 3. Logout Confirmation Function
         function confirmLogout() {
             Swal.fire({
                 title: 'Terminate Session?',
@@ -346,11 +371,59 @@
                 customClass: { popup: 'rounded-4' }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const form = document.getElementById('logout-form');
-                    if(form) form.submit();
+                    document.getElementById('logout-form').submit();
                 }
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('mostBorrowedChart').getContext('2d');
+            
+            // Mengambil data asli dari variabel Controller ($topBooks)
+            const labelsFromDB = {!! json_encode($topBooks->pluck('judul')) !!};
+            const dataFromDB = {!! json_encode($topBooks->pluck('total')) !!};
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labelsFromDB,
+                    datasets: [{
+                        label: 'Total Loans',
+                        data: dataFromDB,
+                        backgroundColor: '#4361ee',
+                        hoverBackgroundColor: '#3f37c9',
+                        borderRadius: 10,
+                        barThickness: 40,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            padding: 12,
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 14 },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 13 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false },
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Plus Jakarta Sans', weight: 600 } }
+                        },
+                        x: {
+                            border: { display: false },
+                            grid: { display: false },
+                            ticks: { font: { family: 'Plus Jakarta Sans', weight: 600 } }
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

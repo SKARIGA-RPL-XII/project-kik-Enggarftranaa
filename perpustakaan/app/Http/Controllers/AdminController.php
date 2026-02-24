@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Buku;
 use App\Models\Category;
@@ -14,10 +15,26 @@ class AdminController extends Controller
     /**
      * Halaman Utama Admin
      */
-    public function dashboard()
-    {
-        return view('admin.dashboard');
-    }
+   public function dashboard()
+{
+    // Mengambil 5 buku yang paling banyak dipinjam
+    // Kita asumsikan nama tabel Anda adalah 'peminjaman' dan 'buku'
+    $topBooks = DB::table('peminjaman')
+        ->join('buku', 'peminjaman.buku_id', '=', 'buku.id') // Pastikan 'buku' bukan 'bukus'
+        ->select('buku.judul', DB::raw('count(peminjaman.id) as total'))
+        ->groupBy('buku.id', 'buku.judul')
+        ->orderBy('total', 'desc')
+        ->limit(5)
+        ->get();
+
+    // Data statis lainnya (sesuaikan dengan nama tabel Anda)
+    $totalMembers = DB::table('users')->count(); // Biasanya tabel user bawaan laravel namanya 'users'
+    $totalBooks = DB::table('buku')->count(); 
+    $totalLoans = DB::table('peminjaman')->count();
+
+    // Pastikan variabel dikirim ke view
+    return view('admin.dashboard', compact('topBooks', 'totalMembers', 'totalBooks', 'totalLoans'));
+}
 
     /* |--------------------------------------------------------------------------
     | LOGIKA DATA BUKU

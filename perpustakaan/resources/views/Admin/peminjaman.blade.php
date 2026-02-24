@@ -77,7 +77,7 @@
         }
         body.sidebar-mini .top-navbar { left: var(--sidebar-mini-width); }
 
-        .main-content { margin-left: var(--sidebar-width); padding: 125px 40px 40px; transition: var(--transition); }
+        .main-content { margin-left: var(--sidebar-width); padding: 125px 30px 40px; transition: var(--transition); }
         body.sidebar-mini .main-content { margin-left: var(--sidebar-mini-width); }
 
         .sidebar-toggle { background: white; border: 1px solid #e2e8f0; width: 42px; height: 42px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -93,15 +93,24 @@
         }
         .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 10px 20px rgba(78, 96, 255, 0.1); }
 
-        .btn-add-large {
-            height: 54px; padding: 0 30px; border-radius: 18px; font-weight: 700;
-            background: var(--primary); color: white; border: none; display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 8px 20px var(--primary-glow); text-decoration: none; transition: 0.3s;
+        /* FILTER & REPORT STYLING */
+        .filter-section {
+            background: white; border-radius: 22px; padding: 20px; margin-bottom: 25px;
+            border: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
         }
-        .btn-add-large:hover { transform: translateY(-2px); color: white; box-shadow: 0 12px 25px var(--primary-glow); }
+        .date-picker-group { display: flex; align-items: center; gap: 10px; }
+        .date-input-custom {
+            border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 15px;
+            font-weight: 600; color: #475569; font-size: 0.85rem; outline: none;
+        }
+        .btn-report {
+            background: #1e293b; color: white; border: none; padding: 10px 20px;
+            border-radius: 14px; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-report:hover { background: #000; transform: translateY(-2px); color: white; }
 
         /* TABLE STYLING */
-        .table-container { background: white; border-radius: 28px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+        .table-container { background: white; border-radius: 28px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
         .user-avatar { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
         .status-badge { padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
@@ -117,6 +126,11 @@
 
         .pulse-danger { animation: pulse-red 2s infinite; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        .date-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .date-day { font-size: 1.05rem; font-weight: 800; color: #1e293b; }
+        .date-month { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .date-time { font-size: 0.7rem; font-weight: 500; color: #94a3b8; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -185,43 +199,61 @@
 </nav>
 
 <main class="main-content">
-    <div class="row align-items-center mb-5">
+    <div class="row align-items-center mb-4">
         <div class="col-lg-4">
             <h2 class="fw-800 mb-1" style="letter-spacing: -1.5px; font-size: 2rem;">Log Transaksi</h2>
             <p class="text-muted small mb-0">Total {{ count($peminjamans) }} aktivitas sirkulasi terdeteksi.</p>
         </div>
-        
         <div class="col-lg-8">
             <div class="d-flex gap-3 justify-content-lg-end mt-3 mt-lg-0">
                 <div class="search-wrapper">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text" id="searchInput" class="search-input" placeholder="Cari nama anggota atau judul buku...">
                 </div>
-
-                <a href="{{ route('admin.scan') }}" class="btn-add-large">
-                    <i class="fa-solid fa-plus fs-5"></i>
-                    <span>Tambah</span>
-                </a>
             </div>
+        </div>
+    </div>
+
+    <div class="filter-section">
+        <form action="{{ route('admin.peminjaman.index') }}" method="GET" class="d-flex align-items-center gap-3">
+            <div class="date-picker-group">
+                <span class="small fw-bold text-muted">DARI</span>
+                <input type="date" name="start_date" id="startDate" class="date-input-custom" value="{{ request('start_date') }}">
+            </div>
+            <div class="date-picker-group">
+                <span class="small fw-bold text-muted">SAMPAI</span>
+                <input type="date" name="end_date" id="endDate" class="date-input-custom" value="{{ request('end_date') }}">
+            </div>
+            <button type="submit" class="btn btn-primary fw-bold px-4" style="border-radius:12px;">Filter</button>
+            <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-light fw-bold px-3 text-muted" style="border-radius:12px;">Reset</a>
+        </form>
+
+        <div class="d-flex gap-2">
+            <button onclick="exportData('pdf')" class="btn-report">
+                <i class="fa-solid fa-print"></i> Cetak PDF
+            </button>
+            
         </div>
     </div>
 
     <div class="table-container">
         <div class="table-responsive">
-            <table class="table align-middle" id="transactionTable">
+            <table class="table align-middle" id="transactionTable" style="min-width: 1000px;">
                 <thead>
                     <tr class="text-muted small fw-bold">
-                        <th>ANGGOTA</th>
-                        <th>BUKU</th>
-                        <th>TENGGAT KEMBALI</th>
-                        <th class="text-center">STATUS</th>
-                        <th class="text-end pe-0">KONTROL ADMIN</th>
+                        <th style="width: 250px;">ANGGOTA</th>
+                        <th style="width: 200px;">BUKU</th>
+                        <th style="width: 150px;">TANGGAL PINJAM</th>
+                        <th style="width: 150px;">TENGGAT KEMBALI</th>
+                        <th class="text-center" style="width: 150px;">STATUS</th>
+                        <th class="text-end pe-0" style="width: 200px;">KONTROL ADMIN</th>
                     </tr>
                 </thead>
                 <tbody>
                 @forelse($peminjamans as $p)
                     @php
                         $now = \Carbon\Carbon::now();
+                        $tglPinjam = \Carbon\Carbon::parse($p->tgl_pinjam);
                         $tenggat = \Carbon\Carbon::parse($p->tgl_kembali);
                         $statusClean = strtoupper(trim($p->status));
                         $isSelesai = ($statusClean === 'DIKEMBALIKAN' || $statusClean === 'KEMBALI');
@@ -249,13 +281,21 @@
                             <div class="text-muted small">ID: BK-{{ $p->buku->id }}</div>
                         </td>
                         <td>
-                            <div class="fw-600 {{ $isTerlambat ? 'text-danger pulse-danger' : '' }} mb-0">
-                                {{ $tenggat->format('d M Y') }}
-                                @if($isTerlambat) <i class="fa-solid fa-circle-exclamation ms-1"></i> @endif
+                            <div class="date-info">
+                                <span class="date-day">{{ $tglPinjam->format('d') }}</span>
+                                <span class="date-month">{{ $tglPinjam->format('M Y') }}</span>
+                                <span class="date-time">{{ $tglPinjam->format('H:i') }} WIB</span>
                             </div>
-                            <small class="{{ $isTerlambat ? 'text-danger' : 'text-muted' }} small">
-                                {{ $tenggat->format('H:i') }} WIB
-                            </small>
+                        </td>
+                        <td>
+                            <div class="date-info">
+                                <span class="date-day {{ $isTerlambat ? 'text-danger pulse-danger' : '' }}">
+                                    {{ $tenggat->format('d') }}
+                                    @if($isTerlambat) <i class="fa-solid fa-circle-exclamation fs-6"></i> @endif
+                                </span>
+                                <span class="date-month {{ $isTerlambat ? 'text-danger' : '' }}">{{ $tenggat->format('M Y') }}</span>
+                                <span class="date-time">{{ $tenggat->format('H:i') }} WIB</span>
+                            </div>
                         </td>
                         <td class="text-center">
                             @if($isSelesai)
@@ -275,11 +315,11 @@
                                 <form action="{{ route('admin.peminjaman.kembalikan', $p->id) }}" method="POST" id="return-form-{{ $p->id }}">
                                     @csrf
                                     <button type="button" class="btn-modern btn-selesai" onclick="confirmReturn('{{ $p->id }}', '{{ $p->buku->judul }}')">
-                                        <i class="fa-solid fa-box-open"></i> Terima Fisik
+                                        <i class="fa-solid fa-box-open"></i> Terima
                                     </button>
                                 </form>
                                 @else
-                                    <span class="text-muted small fw-bold px-3"><i class="fa-solid fa-circle-check text-success"></i> Terverifikasi</span>
+                                    <span class="text-muted small fw-bold px-3"><i class="fa-solid fa-circle-check text-success"></i> Verif</span>
                                 @endif
 
                                 <form action="{{ route('admin.peminjaman.destroy', $p->id) }}" method="POST" id="delete-form-{{ $p->id }}">
@@ -292,7 +332,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-center py-5 text-muted">Belum ada riwayat transaksi.</td></tr>
+                    <tr><td colspan="6" class="text-center py-5 text-muted">Belum ada riwayat transaksi.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -303,30 +343,55 @@
 <script>
     function toggleSidebar() { document.body.classList.toggle('sidebar-mini'); }
 
-    // FITUR SEARCH (JANGAN DIHAPUS)
+    // FITUR SEARCH (Real-time di tabel)
     document.getElementById('searchInput').addEventListener('keyup', function() {
         let filter = this.value.toLowerCase();
         let rows = document.querySelectorAll('#transactionTable tbody tr');
         rows.forEach(row => {
             let nameText = row.querySelector('.search-target-name')?.textContent.toLowerCase() || "";
             let bookText = row.querySelector('.search-target-book')?.textContent.toLowerCase() || "";
-            if (nameText.includes(filter) || bookText.includes(filter)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
+            row.style.display = (nameText.includes(filter) || bookText.includes(filter)) ? "" : "none";
         });
     });
 
-    // SWEETALERT CONFIRMATIONS
+    /**
+     * FUNGSI EXPORT (PDF & EXCEL)
+     */
+    function exportData(type) {
+        // Ambil nilai tanggal langsung dari input
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+
+        // Validasi: Harus pilih tanggal dulu
+        if (!start || !end) {
+            Swal.fire({
+                title: 'Filter Diperlukan',
+                text: 'Harap tentukan tanggal "DARI" dan "SAMPAI" terlebih dahulu sebelum mencetak.',
+                icon: 'warning',
+                confirmButtonColor: '#4e60ff'
+            });
+            return;
+        }
+
+        // Tentukan URL berdasarkan tipe
+        // Pastikan route ini ada di web.php Anda
+        let baseUrl = type === 'pdf' 
+            ? '/admin/report/peminjaman/pdf' 
+            : '/admin/report/peminjaman/excel';
+            
+        // Eksekusi Download
+        window.location.href = `${baseUrl}?start_date=${start}&end_date=${end}`;
+    }
+
+    // KONFIRMASI SWEETALERT (TETAP SAMA)
     function confirmReturn(id, judul) {
         Swal.fire({
             title: 'Verifikasi Fisik',
-            text: "Pastikan buku '" + judul + "' sudah diterima dengan kondisi baik.",
+            text: "Terima buku '" + judul + "'?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
-            confirmButtonText: 'Ya, Terima Buku',
+            confirmButtonText: 'Ya, Terima',
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -338,11 +403,11 @@
     function confirmDelete(id) {
         Swal.fire({
             title: 'Hapus Data?',
-            text: "Data riwayat ini akan hilang permanen dari database.",
+            text: "Data riwayat ini akan hilang permanen.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Hapus Permanen',
+            confirmButtonText: 'Hapus',
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
