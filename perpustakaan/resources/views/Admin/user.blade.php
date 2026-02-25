@@ -183,7 +183,7 @@
                 <thead>
                     <tr class="text-muted small text-uppercase fw-800">
                         <th class="border-0 pb-3">Anggota</th>
-                        <th class="border-0 pb-3">Email & Kredensial</th>
+                        <th class="border-0 pb-3">Email </th>
                         <th class="border-0 pb-3">Status</th>
                         <th class="border-0 pb-3">Bergabung</th>
                         <th class="border-0 pb-3 text-end">Opsi Kelola</th>
@@ -282,11 +282,11 @@
                 <div class="modal-body">
                     <div class="mb-4">
                         <label class="form-label small fw-800 text-uppercase">Nama Lengkap</label>
-                        <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                        <input type="text" name="name" class="form-control" placeholder="Doyoung" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-800 text-uppercase">Email Anggota</label>
-                        <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                        <input type="email" name="email" class="form-control" placeholder="Doyoung@example.com" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-800 text-uppercase">Password Sementara</label>

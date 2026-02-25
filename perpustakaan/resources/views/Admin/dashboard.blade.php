@@ -297,7 +297,7 @@
                 <div class="stat-card">
                     <div class="stat-icon bg-soft-amber"><i class="fa-solid fa-rotate"></i></div>
                     <div>
-                        <h6 class="text-muted small fw-bold mb-1">LOANS</h6>
+                        <h6 class="text-muted small fw-bold mb-1">Peminjaman</h6>
                         <h4 class="fw-800 mb-0">{{ number_format($totalLoans ?? 0) }}</h4>
                     </div>
                 </div>
