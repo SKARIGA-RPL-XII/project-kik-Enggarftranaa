@@ -215,12 +215,7 @@
                         <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                     </div>
 
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" name="remember" id="remember">
-                        <label class="form-check-label" for="remember" style="font-size: 0.9rem; color: #475569;">
-                            Tetap masuk di perangkat ini
-                        </label>
-                    </div>
+                    
 
                     <button type="submit" class="btn btn-login w-100">
                         MASUK KE PORTAL
